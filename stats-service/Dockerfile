@@ -1,5 +1,5 @@
 FROM amazoncorretto:11-alpine-jdk
 LABEL maintainer="AnnaZvereva"
-COPY target/*.jar app.jar
+COPY service-part/target/*.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
 EXPOSE 9090

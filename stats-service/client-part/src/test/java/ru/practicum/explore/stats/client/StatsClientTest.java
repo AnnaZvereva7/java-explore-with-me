@@ -1,0 +1,73 @@
+package ru.practicum.explore.stats.client;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import ru.practicum.explore.stats.dto.HitDto;
+import ru.practicum.explore.stats.dto.StatisticDto;
+import ru.practicum.explore.stats.dto.StatisticDtoInterface;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class StatsClientTest {
+
+    public WireMockServer wireMockServer = new WireMockServer(9090);
+    private StatsClient client;
+    private ObjectMapper objectMapper = new ObjectMapper();
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    @BeforeEach
+    void setUp() {
+        wireMockServer.start();
+        client = new StatsClient(wireMockServer.baseUrl());
+    }
+
+    @AfterEach
+    void turnDown() {
+        wireMockServer.stop();
+    }
+
+    @Test
+    void getStats() throws JsonProcessingException, UnsupportedEncodingException {
+        StatisticDtoInterface statisticDtoInterface = new StatisticDto("ewm-main-service", "/events/1", 2);
+        List<StatisticDtoInterface> result = List.of(statisticDtoInterface);
+
+        String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8.toString());
+        String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8.toString());
+        String encodeUris = URLEncoder.encode("/events/1,/events/2", StandardCharsets.UTF_8.toString());
+
+        configureFor("localhost", 9090);
+        stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + "&uris=" + encodeUris + "&unique=true"))
+                .withHeader("Content-Type", equalTo("application/json"))
+                .withHeader("Accept", equalTo("application/json"))
+                .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(objectMapper.writeValueAsString(result))));
+        List<StatisticDto> actualResult = client.get("2020-05-05 00:00:00",
+                "2035-05-05 00:00:00", List.of("/events/1", "/events/2"), true);
+    }
+
+    @Test
+    void postHit() {
+        configureFor("localhost", 9090);
+        stubFor(post(urlEqualTo("/hit"))
+                .withHeader("Content-Type", equalTo("application/json"))
+                .withHeader("Accept", equalTo("application/json"))
+                .withRequestBody(matchingJsonPath("$.app", containing("ewm-main-service")))
+                .withRequestBody(matchingJsonPath("$.uri", containing("/events/1")))
+                .withRequestBody(matchingJsonPath("$.ip", containing("192.163.0.1")))
+                .withRequestBody(matchingJsonPath("$.timestamp", containing("2022-09-06 11:00:23")))
+                .willReturn(aResponse().withStatus(200)));
+        Boolean result = client.post(new HitDto(null, "ewm-main-service",
+                "/events/1", "192.163.0.1", "2022-09-06 11:00:23"));
+        assertEquals(true, result);
+    }
+}
