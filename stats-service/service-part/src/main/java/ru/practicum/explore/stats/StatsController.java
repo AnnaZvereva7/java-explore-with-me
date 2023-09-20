@@ -41,7 +41,9 @@ public class StatsController {
             throw new WrongPeriodException();
         }
         log.info("Get statistic period from {} to {}, uris: {}, unique= {}", start, end, uris, unique);
-        if (uris==null) { return List.of();}
+        if (uris == null) {
+            return List.of();
+        }
         List<String> urisList = new ArrayList<>();
         for (int i = 0; i < uris.length; i++) {
             if (!uris[i].isBlank()) {
