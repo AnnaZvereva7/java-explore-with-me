@@ -8,9 +8,10 @@ services:
       - stats-db
     environment:
       EWM_SERVICE_SERVER_URL: "http://server:8080"
-      SPRING_DATASOURCE1_URL: "jdbc:postgresql://stats-db:5432/stats"
-      SPRING_STATS_DB_USER: StatsUser
-      SPRING_STATS_DB_PASSWORD: 1111
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://stats-db:5432/stats"
+      SPRING_DATASOURCE_USERNAME: StatsUser
+      SPRING_DATASOURCE_PASSWORD: 1111
+
 
 
   stats-db:
@@ -30,8 +31,8 @@ services:
       - ewm-db
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://ewm-db:5432/ewm"
-      SPRING_EWM_DB_USER: EwmUser
-      SPRING_EWM_DB_PASSWORD: 1111
+      SPRING_DATASOURCE_USERNAME: EwmUser
+      SPRING_DATASOURCE_PASSWORD: 1111
 
 
   ewm-db:

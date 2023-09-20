@@ -55,6 +55,26 @@ class StatsRepositoryTest {
     }
 
     @Test
+    @Sql({"/schema_test.sql", "/import_table.sql"})
+    void getStatisticUniqueOrdered_whenUrisNull() {
+        List<StatisticDtoInterface> statistic = repository.getStatisticUnique(now, now.plusMonths(36), null);
+        assertEquals(3, statistic.size());
+        assertEquals("/events/1", statistic.get(0).getUri());
+        assertEquals(1, statistic.get(0).getHits());
+        assertEquals("/events/2", statistic.get(1).getUri());
+        assertEquals("/events/3", statistic.get(2).getUri());
+    }
+
+    @Test
+    @Sql({"/schema_test.sql", "/import_table.sql"})
+    void getStatisticNotUniqueOrdered_whenUrisNull() {
+        List<StatisticDtoInterface> statistic = repository.getStatisticNotUnique(now, now.plusMonths(36), null);
+        assertEquals(3, statistic.size());
+        assertEquals("/events/1", statistic.get(0).getUri());
+        assertEquals(2, statistic.get(0).getHits());
+    }
+
+    @Test
     @Sql({"/schema_test.sql"})
     void save_whenOk() {
         Hit hit = new Hit(null, "ewm-main-service", "/events/1", "192.163.0.1", now.plusDays(1));

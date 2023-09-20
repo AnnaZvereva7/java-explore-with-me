@@ -14,6 +14,7 @@ import ru.practicum.explore.stats.dto.StatisticDtoInterface;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -26,7 +27,7 @@ class StatsClientTest {
 
     public WireMockServer wireMockServer = new WireMockServer(9090);
     private StatsClient client;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @BeforeEach
@@ -45,9 +46,9 @@ class StatsClientTest {
         StatisticDtoInterface statisticDtoInterface = new StatisticDto("ewm-main-service", "/events/1", 2);
         List<StatisticDtoInterface> result = List.of(statisticDtoInterface);
 
-        String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8.toString());
-        String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8.toString());
-        String encodeUris = URLEncoder.encode("/events/1,/events/2", StandardCharsets.UTF_8.toString());
+        String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8);
+        String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8);
+        String encodeUris = URLEncoder.encode("/events/1,/events/2", StandardCharsets.UTF_8);
 
         configureFor("localhost", 9090);
         stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + "&uris=" + encodeUris + "&unique=true"))
@@ -57,16 +58,16 @@ class StatsClientTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writeValueAsString(result))));
-        List<StatisticDto> actualResult = client.get("2020-05-05 00:00:00",
-                "2035-05-05 00:00:00", List.of("/events/1", "/events/2"), true);
+        List<StatisticDto> actualResult = client.get(LocalDateTime.parse("2020-05-05 00:00:00", FORMATTER),
+                LocalDateTime.parse("2035-05-05 00:00:00", FORMATTER), List.of("/events/1", "/events/2"), true);
         assertEquals(result, actualResult);
     }
 
     @Test
     void getStats_whenError() throws JsonProcessingException, UnsupportedEncodingException {
-        String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8.toString());
-        String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8.toString());
-        String encodeUris = URLEncoder.encode("/events/1,/events/2", StandardCharsets.UTF_8.toString());
+        String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8);
+        String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8);
+        String encodeUris = URLEncoder.encode("/events/1,/events/2", StandardCharsets.UTF_8);
 
         configureFor("localhost", 9090);
         stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + "&uris=" + encodeUris + "&unique=true"))
@@ -77,8 +78,8 @@ class StatsClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody("error")));
         Throwable thrown = catchThrowable(() -> {
-            client.get("2020-05-05 00:00:00",
-                    "2035-05-05 00:00:00", List.of("/events/1", "/events/2"), true);
+            client.get(LocalDateTime.parse("2020-05-05 00:00:00", FORMATTER),
+                    LocalDateTime.parse("2035-05-05 00:00:00", FORMATTER), List.of("/events/1", "/events/2"), true);
         });
         assertThat(thrown).isInstanceOf(HttpClientErrorException.class);
         assertEquals(thrown.getMessage(), "400 Bad Request: \"error\"");
@@ -97,7 +98,7 @@ class StatsClientTest {
                 .willReturn(aResponse()
                         .withStatus(200)));
         Boolean result = client.post(new HitDto(null, "ewm-main-service",
-                "/events/1", "192.163.0.1", "2022-09-06 11:00:23"));
+                "/events/1", "192.163.0.1", LocalDateTime.parse("2022-09-06 11:00:23", FORMATTER)));
         assertEquals(true, result);
     }
 
@@ -118,7 +119,7 @@ class StatsClientTest {
 
         Throwable thrown = catchThrowable(() -> {
             client.post(new HitDto(null, "ewm-main-service",
-                    "/events/1", "192.163.0.1", "2022-09-06 11:00:23"));
+                    "/events/1", "192.163.0.1", LocalDateTime.parse("2022-09-06 11:00:23", FORMATTER)));
         });
         assertThat(thrown).isInstanceOf(HttpClientErrorException.class);
         assertEquals(thrown.getMessage(), "400 Bad Request: \"error\"");

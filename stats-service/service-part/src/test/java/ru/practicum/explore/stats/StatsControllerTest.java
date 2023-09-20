@@ -1,6 +1,7 @@
 package ru.practicum.explore.stats;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class StatsControllerTest {
     @Mock
     private StatsService service;
+    @Mock
+    private HitMapper mapper;
     @InjectMocks
     private StatsController controller;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -37,11 +40,15 @@ class StatsControllerTest {
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(ErrorHandler.class).build();
+        objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Test
     void addHit_whenOk() throws Exception {
-        HitDto hitDto = new HitDto(null, "ewm-main-service", "/events/1", "192.163.0.1", "2022-09-06 11:00:23");
+        HitDto hitDto = new HitDto(null, "ewm-main-service", "/events/1", "192.163.0.1", LocalDateTime.parse("2022-09-06 11:00:23", CommonConstant.FORMATTER));
+        Hit hit = new Hit(1L, "ewm-main-service", "/events/1", "192.163.0.1", LocalDateTime.parse("2022-09-06 11:00:23", CommonConstant.FORMATTER));
+        when(mapper.fromHitDto(hitDto)).thenReturn(hit);
+        when(service.addHit(hit)).thenReturn(hit);
         mvc.perform(post("/hit")
                         .content(objectMapper.writeValueAsString(hitDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -53,7 +60,7 @@ class StatsControllerTest {
 
     @Test
     void addHit_whenWrongApp() throws Exception {
-        HitDto hitDto = new HitDto(null, "  ", "/events/1", "192.163.0.1", "2020-09-06 11:00:23");
+        HitDto hitDto = new HitDto(null, "  ", "/events/1", "192.163.0.1", LocalDateTime.parse("2020-09-06 11:00:23", CommonConstant.FORMATTER));
         mvc.perform(post("/hit")
                         .content(objectMapper.writeValueAsString(hitDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -66,7 +73,7 @@ class StatsControllerTest {
 
     @Test
     void addHit_whenWrongIp() throws Exception {
-        HitDto hitDto = new HitDto(null, "ewm-main-service", "/events/1", "192.163.0", "2020-09-06 11:00:23");
+        HitDto hitDto = new HitDto(null, "ewm-main-service", "/events/1", "192.163.0", LocalDateTime.parse("2020-09-06 11:00:23", CommonConstant.FORMATTER));
         mvc.perform(post("/hit")
                         .content(objectMapper.writeValueAsString(hitDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -78,21 +85,8 @@ class StatsControllerTest {
     }
 
     @Test
-    void addHit_whenWrongDateFormat() throws Exception {
-        HitDto hitDto = new HitDto(null, "ewm-main-service", "/events/1", "192.163.0.1", "2020-09-06 00-00:23");
-        mvc.perform(post("/hit")
-                        .content(objectMapper.writeValueAsString(hitDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$", is("time is incorrect")));
-    }
-
-    @Test
     void addHit_whenWrongDateFuture() throws Exception {
-        HitDto hitDto = new HitDto(null, "ewm-main-service", "/events/1", "192.163.0.1", "2035-09-06 00:00:23");
+        HitDto hitDto = new HitDto(null, "ewm-main-service", "/events/1", "192.163.0.1", LocalDateTime.parse("2035-09-06 00:00:23", CommonConstant.FORMATTER));
         mvc.perform(post("/hit")
                         .content(objectMapper.writeValueAsString(hitDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -100,7 +94,7 @@ class StatsControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$", is("time is incorrect")));
+                .andExpect(jsonPath("$", is("time must be in the past")));
     }
 
 
@@ -135,8 +129,7 @@ class StatsControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$", is("Text '2020-05-05 00-00:00' could not be parsed at index 13")));
+                .andExpect(status().isBadRequest());
     }
 
     @Test

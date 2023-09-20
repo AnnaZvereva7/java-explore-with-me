@@ -6,9 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 import java.time.format.DateTimeParseException;
 
 @RestControllerAdvice
@@ -22,7 +21,7 @@ public class ErrorHandler {
         return e.getBindingResult().getFieldError().getDefaultMessage();
     }
 
-    @ExceptionHandler({DateTimeParseException.class, ValidationException.class, ConstraintViolationException.class, WrongPeriodException.class})
+    @ExceptionHandler({DateTimeParseException.class, WrongPeriodException.class, MethodArgumentTypeMismatchException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String validationException(RuntimeException e) {
         log.debug("Получен статус 400 Bad request {}", e.getMessage(), e);

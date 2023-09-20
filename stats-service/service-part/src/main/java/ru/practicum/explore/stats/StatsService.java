@@ -19,17 +19,9 @@ public class StatsService {
     public List<StatisticDtoInterface> getStatistic(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
 
         if (unique) {
-            if (uris == null) {
-                return statsRepository.getAllStatisticUnique(start, end);
-            } else {
-                return statsRepository.getStatisticUnique(start, end, uris);
-            }
+            return statsRepository.getStatisticUnique(start, end, uris);
         } else {
-            if (uris == null) {
-                return statsRepository.getAllStatisticNotUnique(start, end);
-            } else {
-                return statsRepository.getStatisticNotUnique(start, end, uris);
-            }
+            return statsRepository.getStatisticNotUnique(start, end, uris);
         }
     }
 }

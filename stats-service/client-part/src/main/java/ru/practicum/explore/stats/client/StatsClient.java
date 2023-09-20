@@ -12,38 +12,41 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
 public class StatsClient {
-    private RestTemplate rest;
+    private final RestTemplate rest;
     private final String baseUrl;
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public StatsClient(String baseUrl) {
         this.baseUrl = baseUrl;
-        this.rest = new RestTemplateBuilder().uriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:9090/"))
+        this.rest = new RestTemplateBuilder().uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl))
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                 .build();
     }
 
-    public List<StatisticDto> get(String start, String end, List<String> uris, Boolean unique) throws UnsupportedEncodingException {
-
-        String urisAsString = uris.get(0);
+    public List<StatisticDto> get(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) throws UnsupportedEncodingException {
+        StringBuilder urisPart = new StringBuilder();
+        urisPart.append(uris.get(0));
         for (int i = 1; i < uris.size(); i++) {
-            urisAsString = urisAsString + "," + uris.get(i);
+            urisPart.append(",");
+            urisPart.append(uris.get(i));
         }
-        StringBuilder paramsBuilder = new StringBuilder("?");
-        paramsBuilder.append("start=");
-        paramsBuilder.append(URLEncoder.encode(start, StandardCharsets.UTF_8.toString()));
-        paramsBuilder.append("&end=");
-        paramsBuilder.append(URLEncoder.encode(end, StandardCharsets.UTF_8.toString()));
-        paramsBuilder.append("&uris=");
-        paramsBuilder.append(URLEncoder.encode(urisAsString, StandardCharsets.UTF_8.toString()));
-        paramsBuilder.append("&unique=");
-        paramsBuilder.append(unique.toString());
-        String params = paramsBuilder.toString();
+        String urisAsString = urisPart.toString();
+        String params = "?" + "start=" +
+                URLEncoder.encode(start.format(FORMATTER), StandardCharsets.UTF_8) +
+                "&end=" +
+                URLEncoder.encode(end.format(FORMATTER), StandardCharsets.UTF_8) +
+                "&uris=" +
+                URLEncoder.encode(urisAsString, StandardCharsets.UTF_8) +
+                "&unique=" +
+                unique.toString();
 
-        RequestEntity request = new RequestEntity<>(defaultHeaders(), HttpMethod.GET, URI.create(baseUrl + "/stats" + params));
+        RequestEntity<Object> request = new RequestEntity<>(defaultHeaders(), HttpMethod.GET, URI.create(baseUrl + "/stats" + params));
         ResponseEntity<StatisticDto[]> responseEntity = rest.exchange(request, StatisticDto[].class);
         return Arrays.asList(responseEntity.getBody());
     }
