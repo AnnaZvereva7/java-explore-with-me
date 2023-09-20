@@ -41,19 +41,19 @@ public class StatsController {
             throw new WrongPeriodException();
         }
         log.info("Get statistic period from {} to {}, uris: {}, unique= {}", start, end, uris, unique);
-        if (uris == null) {
-            return List.of();
-        }
         List<String> urisList = new ArrayList<>();
-        for (int i = 0; i < uris.length; i++) {
-            if (!uris[i].isBlank()) {
-                urisList.add(uris[i]);
+        if (uris == null) {
+            urisList = null;
+        } else {
+            for (int i = 0; i < uris.length; i++) {
+                if (!uris[i].isBlank()) {
+                    urisList.add(uris[i]);
+                }
+            }
+            if (urisList.size() == 0) {
+                return List.of();
             }
         }
-        if (urisList.size() == 0) {
-            return List.of();
-        }
-
         return statsService.getStatistic(startPeriod, endPeriod, urisList, unique)
                 .stream()
                 .map(k -> new StatisticDto(k))
