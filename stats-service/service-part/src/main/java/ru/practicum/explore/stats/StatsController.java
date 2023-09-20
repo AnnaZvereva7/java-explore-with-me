@@ -33,7 +33,7 @@ public class StatsController {
     @GetMapping("/stats")
     public List<StatisticDto> getStatistic(@RequestParam(name = "start") String start,
                                            @RequestParam(name = "end") String end,
-                                           @RequestParam(name = "uris") String[] uris,
+                                           @RequestParam(name = "uris", required = false) String[] uris,
                                            @RequestParam(defaultValue = "false", name = "unique") boolean unique) {
         LocalDateTime startPeriod = LocalDateTime.parse(start, CommonConstant.FORMATTER);
         LocalDateTime endPeriod = LocalDateTime.parse(end, CommonConstant.FORMATTER);
@@ -41,6 +41,7 @@ public class StatsController {
             throw new WrongPeriodException();
         }
         log.info("Get statistic period from {} to {}, uris: {}, unique= {}", start, end, uris, unique);
+        if (uris==null) { return List.of();}
         List<String> urisList = new ArrayList<>();
         for (int i = 0; i < uris.length; i++) {
             if (!uris[i].isBlank()) {
