@@ -45,23 +45,13 @@ public class StatsClient {
 
         RequestEntity request = new RequestEntity<>(defaultHeaders(), HttpMethod.GET, URI.create(baseUrl + "/stats" + params));
         ResponseEntity<StatisticDto[]> responseEntity = rest.exchange(request, StatisticDto[].class);
-        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return Arrays.asList(responseEntity.getBody());
-        } else {
-            String error = responseEntity.getBody().toString();
-            throw new ClientException(error);
-        }
+        return Arrays.asList(responseEntity.getBody());
     }
 
     public boolean post(HitDto hitDto) {
         RequestEntity<HitDto> request = new RequestEntity<>(hitDto, defaultHeaders(), HttpMethod.POST, URI.create(baseUrl + "/hit"));
         ResponseEntity<Void> responseEntity = rest.exchange(request, Void.class);
-        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return true;
-        } else {
-            String error = responseEntity.getBody().toString();
-            throw new ClientException(error);
-        }
+        return true;
     }
 
     private HttpHeaders defaultHeaders() {
