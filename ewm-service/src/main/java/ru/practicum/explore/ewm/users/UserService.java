@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.ewm.common.OffsetBasedPageRequest;
+import ru.practicum.explore.ewm.exceptions.NotFoundException;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository repository;
-    private final Sort sort=Sort.by("id").ascending();
+    private final Sort sort = Sort.by("id").ascending();
 
     public List<User> getUsers(List<Long> ids, int from, int size) {
         if (ids == null) {
@@ -21,16 +22,16 @@ public class UserService {
         }
     }
 
-    public User addUser (User user) {
+    public User addUser(User user) {
         return repository.saveAndFlush(user);
     }
 
-    public void delete (Long userId) {
+    public void delete(Long userId) {
         repository.deleteById(userId);
     }
 
-    public User findById (Long userId) {
-        return repository.findById(userId).orElseThrow(); //noSuchElementException
+    public User findById(Long userId) {
+        return repository.findById(userId).orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
     }
 
 }

@@ -1,6 +1,5 @@
 package ru.practicum.explore.ewm.users;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -15,20 +14,19 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
-@Slf4j
 class UserRepositoryTest {
     @Autowired
     private UserRepository repository;
 
-    Sort sort= Sort.by("id").ascending();
+    Sort sort = Sort.by("id").ascending();
 
     @Test
     @Sql({"/schemaTest.sql", "/import_tables.sql"})
     void findUserByIdIn_whenOk() {
-        List<User> actualUsers = repository.findUserByIdIn(List.of(1L, 2L), new OffsetBasedPageRequest(0,10, sort));
+        List<User> actualUsers = repository.findUserByIdIn(List.of(1L, 2L), new OffsetBasedPageRequest(0, 10, sort));
         assertEquals(2, actualUsers.size());
         assertEquals("name1", actualUsers.get(0).getName());
         assertEquals("email2@mail.ru", actualUsers.get(1).getEmail());
@@ -37,14 +35,14 @@ class UserRepositoryTest {
     @Test
     @Sql({"/schemaTest.sql", "/import_tables.sql"})
     void findUserByIdIn_whenWrongIds() {
-        List<User> actualUsers = repository.findUserByIdIn(List.of(5L), new OffsetBasedPageRequest(0,10, sort));
+        List<User> actualUsers = repository.findUserByIdIn(List.of(5L), new OffsetBasedPageRequest(0, 10, sort));
         assertEquals(0, actualUsers.size());
     }
 
     @Test
     @Sql({"/schemaTest.sql"})
     void findUserByIdIn_whenEmpty() {
-        List<User> actualUsers = repository.findUserByIdIn(List.of(1L), new OffsetBasedPageRequest(0,10 , sort));
+        List<User> actualUsers = repository.findUserByIdIn(List.of(1L), new OffsetBasedPageRequest(0, 10, sort));
         assertEquals(0, actualUsers.size());
     }
 

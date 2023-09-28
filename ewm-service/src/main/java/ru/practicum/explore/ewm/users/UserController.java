@@ -2,6 +2,7 @@ package ru.practicum.explore.ewm.users;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.ewm.users.dto.UserDto;
@@ -35,12 +36,15 @@ public class UserController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public UserDto addUser(@RequestBody @Valid UserNewDto newUser) {
         return userMapper.fromUserToDto(userService.addUser(userMapper.fromDtoNewToUser(newUser)));
     }
 
     @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long userId) {
+        userService.findById(userId);
         userService.delete(userId);
     }
 

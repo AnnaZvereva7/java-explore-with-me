@@ -6,13 +6,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.explore.ewm.common.OffsetBasedPageRequest;
+import ru.practicum.explore.ewm.exceptions.NotFoundException;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,8 +26,9 @@ class UserServiceTest {
 
     @BeforeEach
     void setup() {
-        service=new UserService(repository);
+        service = new UserService(repository);
     }
+
     @Test
     void getUsers_whenAll() {
         when(repository.findAll(any(OffsetBasedPageRequest.class))).thenReturn(List.of(user));
@@ -39,7 +41,7 @@ class UserServiceTest {
 
     @Test
     void getUsers_whenListOfIds() {
-        List<Long> ids=List.of(1L, 2L);
+        List<Long> ids = List.of(1L, 2L);
         when(repository.findUserByIdIn(eq(ids), any(OffsetBasedPageRequest.class))).thenReturn(List.of(user));
         List<User> users = service.getUsers(ids, 0, 10);
         assertEquals(1, users.size());
@@ -75,6 +77,6 @@ class UserServiceTest {
         Throwable thrown = catchThrowable(() -> {
             service.findById(1L);
         });
-        assertThat(thrown).isInstanceOf(NoSuchElementException.class);
+        assertThat(thrown).isInstanceOf(NotFoundException.class);
     }
 }

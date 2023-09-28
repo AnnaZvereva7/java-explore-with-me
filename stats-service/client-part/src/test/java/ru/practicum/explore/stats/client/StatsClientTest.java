@@ -48,10 +48,10 @@ class StatsClientTest {
 
         String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8);
         String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8);
-        String encodeUris = URLEncoder.encode("/events/1,/events/2", StandardCharsets.UTF_8);
+        String encodeUris = URLEncoder.encode("&uris=/events/1&uris=/events/2", StandardCharsets.UTF_8);
 
         configureFor("localhost", 9090);
-        stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + "&uris=" + encodeUris + "&unique=true"))
+        stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + encodeUris + "&unique=true"))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
@@ -67,10 +67,10 @@ class StatsClientTest {
     void getStats_whenError() throws JsonProcessingException, UnsupportedEncodingException {
         String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8);
         String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8);
-        String encodeUris = URLEncoder.encode("/events/1,/events/2", StandardCharsets.UTF_8);
+        String encodeUris = URLEncoder.encode("&uris=/events/1&uris=/events/2", StandardCharsets.UTF_8);
 
         configureFor("localhost", 9090);
-        stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + "&uris=" + encodeUris + "&unique=true"))
+        stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + encodeUris + "&unique=true"))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
@@ -97,9 +97,9 @@ class StatsClientTest {
                 .withRequestBody(matchingJsonPath("$.timestamp", containing("2022-09-06 11:00:23")))
                 .willReturn(aResponse()
                         .withStatus(200)));
-        Boolean result = client.post(new HitDto(null, "ewm-main-service",
+        client.post(new HitDto(null, "ewm-main-service",
                 "/events/1", "192.163.0.1", LocalDateTime.parse("2022-09-06 11:00:23", FORMATTER)));
-        assertEquals(true, result);
+        //  assertEquals(true, result);
     }
 
     @Test

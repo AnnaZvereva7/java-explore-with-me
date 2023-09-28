@@ -11,5 +11,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findUserByIdIn(List<Long> usersId, OffsetBasedPageRequest pageRequest);
 
     @Query(value = "Select u from User u")
-    List<User> findAll( OffsetBasedPageRequest pageRequest);
+    List<User> findAll(OffsetBasedPageRequest pageRequest);
 }
