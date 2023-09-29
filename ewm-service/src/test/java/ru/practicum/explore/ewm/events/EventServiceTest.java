@@ -56,7 +56,7 @@ class EventServiceTest {
     void findByUserId_whenOk() throws UnsupportedEncodingException {
         Event event = Event.builder().id(2L).title("title").build();
         List<Event> events = List.of(event);
-        StatisticDto statisticDto=new StatisticDto("app", "/events/2", 3);
+        StatisticDto statisticDto = new StatisticDto("app", "/events/2", 3);
 
         when(repository.findByUserId(1L, new OffsetBasedPageRequest(0, 10, Sort.by("id").ascending()))).thenReturn(events);
         when(client.get(LocalDateTime.of(2000, 1, 1, 0, 0, 0),
