@@ -16,7 +16,7 @@ public class EwmMain {
 
     @Bean
     public StatsClient getStatsClientBean() {
-        return new StatsClient("http://localhost:9090");
+        return new StatsClient("http://stats-server:9090");
     }
 
     @Bean
