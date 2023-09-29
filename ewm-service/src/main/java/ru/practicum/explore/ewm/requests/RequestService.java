@@ -47,7 +47,7 @@ public class RequestService {
             throw new AccessException("Нельзя превысить лимит участников мероприятия");
         }
         Request newRequest = new Request(null, eventId, userId, LocalDateTime.now(), null);
-        if (event.getRequestModeration()) {
+        if (event.getRequestModeration() && event.getParticipantLimit() != 0) {
             newRequest.setStatus(Status.PENDING);
         } else newRequest.setStatus(Status.CONFIRMED);
         return repository.saveAndFlush(newRequest);

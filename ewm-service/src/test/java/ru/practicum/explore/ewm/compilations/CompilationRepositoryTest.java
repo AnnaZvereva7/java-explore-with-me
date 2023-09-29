@@ -25,7 +25,7 @@ class CompilationRepositoryTest {
         assertEquals(3, actualComp.get().getEventsList().size());
         assertEquals("annotation2", actualComp.get().getEventsList().get(0).getAnnotation());
         assertEquals("annotation3", actualComp.get().getEventsList().get(1).getAnnotation());
-        assertEquals("annotation7", actualComp.get().getEventsList().get(2).getAnnotation());
+        assertEquals("annotation6", actualComp.get().getEventsList().get(2).getAnnotation());
     }
 
     @Test

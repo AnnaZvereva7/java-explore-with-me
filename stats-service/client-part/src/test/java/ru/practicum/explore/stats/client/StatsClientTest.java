@@ -12,8 +12,6 @@ import ru.practicum.explore.stats.dto.StatisticDto;
 import ru.practicum.explore.stats.dto.StatisticDtoInterface;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -45,13 +43,8 @@ class StatsClientTest {
     void getStats() throws JsonProcessingException, UnsupportedEncodingException {
         StatisticDtoInterface statisticDtoInterface = new StatisticDto("ewm-main-service", "/events/1", 2);
         List<StatisticDtoInterface> result = List.of(statisticDtoInterface);
-
-        String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8);
-        String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8);
-        String encodeUris = URLEncoder.encode("&uris=/events/1&uris=/events/2", StandardCharsets.UTF_8);
-
         configureFor("localhost", 9090);
-        stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + encodeUris + "&unique=true"))
+        stubFor(get(urlEqualTo("/stats?start=2020-05-05%2000:00:00&end=2035-05-05%2000:00:00&uris=/events/1&uris=/events/2&unique=true"))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()
@@ -65,12 +58,8 @@ class StatsClientTest {
 
     @Test
     void getStats_whenError() throws JsonProcessingException, UnsupportedEncodingException {
-        String encodeStart = URLEncoder.encode("2020-05-05 00:00:00", StandardCharsets.UTF_8);
-        String encodeEnd = URLEncoder.encode("2035-05-05 00:00:00", StandardCharsets.UTF_8);
-        String encodeUris = URLEncoder.encode("&uris=/events/1&uris=/events/2", StandardCharsets.UTF_8);
-
         configureFor("localhost", 9090);
-        stubFor(get(urlEqualTo("/stats?start=" + encodeStart + "&end=" + encodeEnd + encodeUris + "&unique=true"))
+        stubFor(get(urlEqualTo("/stats?start=2020-05-05%2000:00:00&end=2035-05-05%2000:00:00&uris=/events/1&uris=/events/2&unique=true"))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withHeader("Accept", equalTo("application/json"))
                 .willReturn(aResponse()

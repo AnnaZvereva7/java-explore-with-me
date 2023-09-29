@@ -154,7 +154,7 @@ class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         verify(service, times(1)).delete(1L);
     }
 }

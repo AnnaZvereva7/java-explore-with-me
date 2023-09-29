@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class EventDtoRequest {
     @NotBlank(groups = Marker.OnCreate.class, message = "Title must be not blank")
     @Size(min = 3, max = 120, groups = {Marker.OnUpdate.class, Marker.OnCreate.class}, message = "Size of Title max=120, min=3")

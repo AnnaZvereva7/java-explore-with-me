@@ -41,9 +41,9 @@ class CategoryRepositoryTest {
     void add_whenOk() {
         Category newCat = new Category(null, "category5");
         Category actualCat = repository.saveAndFlush(newCat);
-        assertEquals(4, actualCat.getId());
+        assertEquals(5, actualCat.getId());
         assertEquals("category5", actualCat.getName());
-        assertEquals(4, repository.findAll().size());
+        assertEquals(5, repository.findAll().size());
     }
 
     @Test
@@ -59,8 +59,8 @@ class CategoryRepositoryTest {
     @Test
     @Sql({"/schemaTest.sql", "/import_tables.sql"})
     void delete_whenOk() {
-        repository.deleteById(1);
-        assertEquals(2, repository.findAll().size());
+        repository.deleteById(4);
+        assertEquals(3, repository.findAll().size());
     }
 
     @Test
@@ -70,7 +70,7 @@ class CategoryRepositoryTest {
         Category updated = repository.saveAndFlush(cat);
         assertEquals(1, updated.getId());
         assertEquals("newCategoryName", updated.getName());
-        assertEquals(3, repository.findAll().size());
+        assertEquals(4, repository.findAll().size());
     }
 
     @Test
@@ -80,7 +80,7 @@ class CategoryRepositoryTest {
         Category updated = repository.saveAndFlush(cat);
         assertEquals(1, updated.getId());
         assertEquals("category1", updated.getName());
-        assertEquals(3, repository.findAll().size());
+        assertEquals(4, repository.findAll().size());
     }
 
     @Test
@@ -88,7 +88,7 @@ class CategoryRepositoryTest {
     void findAllPage_whenOk() {
         OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(0, 10, Sort.by("id").ascending());
         List<Category> cats = repository.findAllPage(pageRequest);
-        assertEquals(3, cats.size());
+        assertEquals(4, cats.size());
         assertEquals(1, cats.get(0).getId());
         assertEquals(2, cats.get(1).getId());
         assertEquals(3, cats.get(2).getId());
@@ -99,7 +99,7 @@ class CategoryRepositoryTest {
     void findAllPage_whenFrom1() {
         OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(1, 10, Sort.by("id").ascending());
         List<Category> cats = repository.findAllPage(pageRequest);
-        assertEquals(2, cats.size());
+        assertEquals(3, cats.size());
         assertEquals(2, cats.get(0).getId());
         assertEquals(3, cats.get(1).getId());
     }

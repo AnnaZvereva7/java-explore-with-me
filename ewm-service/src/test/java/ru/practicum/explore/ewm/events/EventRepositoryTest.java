@@ -27,7 +27,7 @@ class EventRepositoryTest {
     @Sql({"/schemaTest.sql", "/import_tables.sql"})
     void findByUserId_whenOk() {
         List<Event> events = repository.findByUserId(1L, new OffsetBasedPageRequest(0, 10, sort));
-        assertEquals(5, events.size());
+        assertEquals(7, events.size());
     }
 
     @Test
@@ -37,7 +37,7 @@ class EventRepositoryTest {
         assertEquals(1, events.size());
         assertEquals("title2", events.get(0).getTitle());
         assertEquals("category2", events.get(0).getCategory().getName());
-        assertEquals(LocalDateTime.parse("2025-09-08 12:00:00", CommonConstant.FORMATTER), events.get(0).getEventDate());
+        assertEquals(LocalDateTime.parse("2025-08-01 12:00:00", CommonConstant.FORMATTER), events.get(0).getEventDate());
         assertEquals(38.62f, events.get(0).getLon());
         assertEquals(true, events.get(0).getPaid());
         assertEquals(State.PUBLISHED, events.get(0).getState());
@@ -99,6 +99,9 @@ class EventRepositoryTest {
                 LocalDateTime.parse("2025-08-02 12:00:00", CommonConstant.FORMATTER),
                 null, pageRequest);
         assertEquals(3, events.size());
+        assertEquals("title6", events.get(0).getTitle());
+        assertEquals("title7", events.get(1).getTitle());
+        assertEquals("title3", events.get(2).getTitle());
     }
 
 }

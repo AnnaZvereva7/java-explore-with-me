@@ -37,16 +37,7 @@ public class StatsClient {
             urisPart.append(uri);
         }
         String urisAsString = urisPart.toString();
-//        String params = "?" + "start=" +
-//                URLEncoder.encode(start.format(FORMATTER), StandardCharsets.UTF_8) +
-//                "&end=" +
-//                URLEncoder.encode(end.format(FORMATTER), StandardCharsets.UTF_8) +
-//                URLEncoder.encode(urisAsString, StandardCharsets.UTF_8) +
-//                "&unique=" +
-//                unique.toString();
-
         String params = "?" + "start=" + start.format(FORMATTER) + "&end=" + end.format(FORMATTER) + urisAsString + "&unique=" + unique.toString();
-
         RequestEntity<Object> request = new RequestEntity<>(defaultHeaders(), HttpMethod.GET, URI.create(baseUrl + "/stats" + params));
         ResponseEntity<List<StatisticDto>> responseEntity = rest.exchange(request, new ParameterizedTypeReference<List<StatisticDto>>() {
         });

@@ -41,7 +41,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND (:rangeEnd IS NULL OR e.eventDate<:rangeEnd) " +
             "AND e.eventDate>:rangeStart AND e.state='PUBLISHED' " +
             "AND ((SELECT count(r.id) from Request r WHERE r.eventId=e.id AND r.status='CONFIRMED')<e.participantLimit " +
-            "OR (SELECT count(r.id) from Request r WHERE r.eventId=e.id AND r.status='CONFIRMED') IS NULL)")
+            "OR (SELECT count(r.id) from Request r WHERE r.eventId=e.id AND r.status='CONFIRMED')=0)")
     List<Event> findWithConditionsAvailableOnly(@Param("text") String text,
                                                 @Param("categories") List<Integer> categories,
                                                 @Param("paid") Boolean paid,

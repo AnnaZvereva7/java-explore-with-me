@@ -60,7 +60,7 @@ class CategoryControllerAdminTest {
 
     @Test
     void addCategory_whenNameLong() throws Exception {
-        CategoryDtoNew dtoWrong = new CategoryDtoNew("Category Name Too Long");
+        CategoryDtoNew dtoWrong = new CategoryDtoNew("Category Name Too LongCategory Name Too LongCategory Name Too Long");
         mvc.perform(post("/admin/categories")
                         .content(objectMapper.writeValueAsString(dtoWrong))
                         .accept(MediaType.APPLICATION_JSON)
@@ -69,7 +69,7 @@ class CategoryControllerAdminTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
                 .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
-                .andExpect(jsonPath("$.message", is("Max size 20")))
+                .andExpect(jsonPath("$.message", is("Max size 50")))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 

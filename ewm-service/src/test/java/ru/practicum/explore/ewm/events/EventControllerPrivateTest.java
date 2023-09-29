@@ -55,7 +55,7 @@ class EventControllerPrivateTest {
 
     @Test
     void addEvent_whenWrongDto() throws Exception {
-        EventDtoRequest dto = new EventDtoRequest(" ", "annotation", "description", 1, now.plusDays(1), new LocationDto(56.15f, 45.12f), true, 10, true, null);
+        EventDtoRequest dto = new EventDtoRequest("    ", "annotationannotationannotation", "descriptiondescriptiondescription", 1, now.plusDays(1), new LocationDto(56.15f, 45.12f), true, 10, true, null);
         mvc.perform(post("/users/{userId}/events", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
@@ -70,16 +70,16 @@ class EventControllerPrivateTest {
 
     @Test
     void addEvent_when1HourBeforeEvent() throws Exception {
-        EventDtoRequest dto = new EventDtoRequest("title", "annotation", "description", 1, now.plusHours(1), new LocationDto(56.15f, 45.12f), true, 10, true, null);
+        EventDtoRequest dto = new EventDtoRequest("title", "annotationannotationannotation", "descriptiondescriptiondescriptiondescription", 1, now.plusHours(1), new LocationDto(56.15f, 45.12f), true, 10, true, null);
         doThrow(new EventDateException(now.plusHours(1))).when(service).checkEvenDate(now.plusHours(1), 2);
         mvc.perform(post("/users/{userId}/events", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status", is("FORBIDDEN")))
-                .andExpect(jsonPath("$.reason", is("For the requested operation the conditions are not met.")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
+                .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
                 .andExpect(jsonPath("$.message", is("Field: eventDate. Error: должно содержать дату, которая еще не наступила. Value: " + now.plusHours(1).format(CommonConstant.FORMATTER))))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
