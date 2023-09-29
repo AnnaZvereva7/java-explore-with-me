@@ -22,7 +22,7 @@ public class ErrorHandler {
         return e.getBindingResult().getFieldError().getDefaultMessage();
     }
 
-    @ExceptionHandler({DateTimeParseException.class, MissingServletRequestParameterException.class, WrongPeriodException.class, MethodArgumentTypeMismatchException.class})
+    @ExceptionHandler({DateTimeParseException.class, WrongPeriodException.class, MethodArgumentTypeMismatchException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String validationException(RuntimeException e) {
         log.debug("Получен статус 400 Bad request {}", e.getMessage(), e);

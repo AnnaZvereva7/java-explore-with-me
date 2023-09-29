@@ -59,7 +59,7 @@ class StatsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 //then
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
