@@ -3,6 +3,7 @@ package ru.practicum.explore.stats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.stats.dto.HitDto;
@@ -25,6 +26,7 @@ public class StatsController {
     private final StatsMapper statsMapper;
 
     @PostMapping("/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public HitDto addHit(@RequestBody @Valid HitDto hit) {
         log.info("Get hit app={}, uri={}, ip={}, timeshtamp={}", hit.getApp(), hit.getUri(), hit.getIp(), hit.getRequestTime());
         return mapper.toHitDto(statsService.addHit(mapper.fromHitDto(hit)));
