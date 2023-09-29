@@ -19,7 +19,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto MethodArgumentNotValidExceptionn(MethodArgumentNotValidException e) {
+    public ExceptionDto MethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.debug("Получен статус 400 Bad request {}", e.getMessage(), e);
         ExceptionDto dto = new ExceptionDto();
         dto.setStatus("BAD_REQUEST");
@@ -67,7 +67,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ExceptionDto SQL(DataIntegrityViolationException e) {
+    public ExceptionDto SQLException(DataIntegrityViolationException e) {
         log.debug("Получен статус 409 Conflict {}", e.getMessage(), e);
         ExceptionDto dto = new ExceptionDto();
         dto.setStatus("CONFLICT");
