@@ -37,7 +37,7 @@ public class StatsController {
                                            @RequestParam(name = "end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
                                            @RequestParam(name = "uris", required = false) List<String> uris,
                                            @RequestParam(defaultValue = "false", name = "unique") boolean unique) {
-        if (start.isAfter(end) || start.isEqual(end)) {
+        if (start.isAfter(end)) {
             throw new WrongPeriodException();
         }
         log.info("Get statistic period from {} to {}, uris: {}, unique= {}", start, end, uris, unique);

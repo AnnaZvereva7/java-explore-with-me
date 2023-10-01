@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,13 +56,12 @@ class EventServiceTest {
 
     @Test
     void findByUserId_whenOk() throws UnsupportedEncodingException {
-        Event event = Event.builder().id(2L).title("title").build();
+        Event event = Event.builder().id(2L).title("title").publishedOn(LocalDateTime.now().minusMonths(1)).build();
         List<Event> events = List.of(event);
         StatisticDto statisticDto = new StatisticDto("app", "/events/2", 3);
 
         when(repository.findByUserId(1L, new OffsetBasedPageRequest(0, 10, Sort.by("id").ascending()))).thenReturn(events);
-        when(client.get(LocalDateTime.of(2000, 1, 1, 0, 0, 0),
-                LocalDateTime.of(2050, 12, 31, 0, 0, 0), List.of("/events/2"), true))
+        when(client.get(any(), any(), eq(List.of("/events/2")), eq(true)))
                 .thenReturn(List.of(statisticDto));
         when(statsMapper.getEventId(statisticDto)).thenReturn(2L);
         when(requestRepository.countRequestsByEventId(List.of(2L))).thenReturn(List.of(new RequestDtoCount(2L, 2)));

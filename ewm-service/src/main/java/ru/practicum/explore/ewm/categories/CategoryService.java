@@ -28,7 +28,9 @@ public class CategoryService {
     }
 
     public void delete(Integer catId) {
-        findById(catId);
+        if (!repository.existsById(catId)) {
+            throw new NotFoundException("Category with id=" + catId + " was not found");
+        }
         repository.deleteById(catId);
     }
 

@@ -27,6 +27,7 @@ public class CompilationControllerPublic {
     public List<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,
                                                 @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                 @RequestParam(defaultValue = "10") @Positive int size) {
+        log.info("Public: get compilations from {} size {}, with pinned={}", from, size, pinned);
         return service.findCompListWithConditions(pinned, from, size)
                 .stream()
                 .map(mapper::fromCompilationToDto)
@@ -35,6 +36,7 @@ public class CompilationControllerPublic {
 
     @GetMapping("/{compId}")
     public CompilationDto getCompilationById(@PathVariable Long compId) {
+        log.info("Public: get compilation with id={}", compId);
         return mapper.fromCompilationToDto(service.findComp(compId));
     }
 }

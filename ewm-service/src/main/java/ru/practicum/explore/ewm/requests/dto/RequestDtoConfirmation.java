@@ -1,18 +1,20 @@
 package ru.practicum.explore.ewm.requests.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import ru.practicum.explore.ewm.requests.model.Status;
+import lombok.*;
 
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestDtoConfirmation {
-    private List<Long> requestIds;
-    private Status status;
+    private Set<Long> requestIds;
+    private StatusConfirmation status;
+
+    public enum StatusConfirmation {
+        CONFIRMED,
+        REJECTED
+    }
 }

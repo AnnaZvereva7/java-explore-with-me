@@ -6,6 +6,7 @@ import lombok.*;
 import ru.practicum.explore.ewm.common.Marker;
 import ru.practicum.explore.ewm.events.model.StateAction;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
@@ -32,10 +33,11 @@ public class EventDtoRequest {
     @NotNull(groups = Marker.OnCreate.class, message = "Category must be not null")
     @JsonProperty(value = "category")
     private Integer categoryId;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     @JsonProperty(value = "location")
+    @Valid
+    @NotNull
     private LocationDto locationDto;
     private Boolean paid;
     @PositiveOrZero(groups = {Marker.OnUpdate.class, Marker.OnCreate.class}, message = "Participant limit must be >=0")

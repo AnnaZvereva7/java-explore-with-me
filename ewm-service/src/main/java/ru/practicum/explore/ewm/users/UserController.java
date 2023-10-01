@@ -28,7 +28,7 @@ public class UserController {
     public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                   @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("getUsers " + ids);
+        log.info("Admin: get users from {} size {} with id in {} ", from, size, ids);
         return userService.getUsers(ids, from, size)
                 .stream()
                 .map(userMapper::fromUserToDto)
@@ -38,14 +38,15 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto addUser(@RequestBody @Valid UserNewDto newUser) {
+        log.info("Admin: add new user {}", newUser);
         return userMapper.fromUserToDto(userService.addUser(userMapper.fromDtoNewToUser(newUser)));
     }
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long userId) {
+        log.info("Admin: delete user with id{}", userId);
         userService.findById(userId);
         userService.delete(userId);
     }
-
 }

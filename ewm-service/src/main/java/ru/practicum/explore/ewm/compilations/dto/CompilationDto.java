@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.explore.ewm.events.dto.EventDtoShort;
 
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -18,5 +18,5 @@ public class CompilationDto {
     private String title;
     private Boolean pinned;
     @JsonProperty(value = "events")
-    private List<EventDtoShort> eventsList;
+    private Set<EventDtoShort> eventsList;
 }

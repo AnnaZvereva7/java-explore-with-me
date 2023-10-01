@@ -10,6 +10,7 @@ import ru.practicum.explore.ewm.events.model.State;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e from Event e JOIN FETCH e.initiator i JOIN FETCH e.category c WHERE i.id=:userId")
@@ -50,6 +51,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                                 OffsetBasedPageRequest pageRequest);
 
     List<Event> findByIdIn(List<Long> ids);
+
+    Set<Event> findByIdIn(Set<Long> ids);
 
     Optional<Event> findByIdAndState(Long id, State state);
 }

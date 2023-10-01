@@ -38,7 +38,7 @@ public class EventService {
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
     private final StatsMapper statsMapper;
-    Sort sort = Sort.by("id").ascending();
+    private Sort sort = Sort.by("id").ascending();
 
     public Event addEvent(Event event) {
         return repository.saveAndFlush(event);
@@ -179,14 +179,34 @@ public class EventService {
         return addViewsAndCountRequests(repository.findByIdIn(ids));
     }
 
+    public Set<Event> findByIdInSet(Set<Long> ids) {
+        List<Event> events = new ArrayList<>(repository.findByIdIn(ids));
+        return new HashSet<>(addViewsAndCountRequests(events));
+    }
+
     public List<Event> addViewsAndCountRequests(List<Event> events) {
         if (events == null || events.isEmpty()) {
             return events;
         } else {
-            List<Long> ids = events.stream().map(Event::getId).collect(Collectors.toList());
-            Map<Long, Integer> statisticMap = getStatisticAsMap(ids, true);
-            Map<Long, Integer> confirmedRequests = requestRepository.countRequestsByEventId(ids).stream()
-                    .collect(Collectors.toMap(RequestDtoCount::getEvent, RequestDtoCount::getRequests));
+            LocalDateTime minDate = null;
+            for (Event event : events) {
+                if (event.getPublishedOn() != null) {
+                    if (minDate != null && minDate.isAfter(event.getPublishedOn())) {
+                        minDate = event.getPublishedOn();
+                    } else if (minDate == null) {
+                        minDate = event.getPublishedOn();
+                    }
+                }
+            }
+            Map<Long, Integer> statisticMap = new HashMap<>();
+            Map<Long, Integer> confirmedRequests = new HashMap<>();
+            if (minDate != null) {
+                List<Long> ids = events.stream().map(Event::getId).collect(Collectors.toList());
+                statisticMap = getStatisticAsMap(ids, true, minDate);
+                confirmedRequests = requestRepository.countRequestsByEventId(ids).stream()
+                        .collect(Collectors.toMap(RequestDtoCount::getEvent, RequestDtoCount::getRequests));
+
+            }
             for (Event event : events) {
                 event.setViews(statisticMap.getOrDefault(event.getId(), 0));
                 event.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
@@ -199,22 +219,27 @@ public class EventService {
         if (event == null) {
             return event;
         }
-        Map<Long, Integer> statistic = getStatisticAsMap(List.of(event.getId()), true);
-        Map<Long, Integer> confirmedRequests = requestRepository.countRequestsByEventId(List.of(event.getId())).stream()
-                .collect(Collectors.toMap(RequestDtoCount::getEvent, RequestDtoCount::getRequests));
-        event.setViews(statistic.getOrDefault(event.getId(), 0));
-        event.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
+        if (event.getPublishedOn() == null) {
+            event.setViews(0);
+            event.setConfirmedRequests(0);
+        } else {
+            Map<Long, Integer> statistic = getStatisticAsMap(List.of(event.getId()), true, event.getPublishedOn());
+            Map<Long, Integer> confirmedRequests = requestRepository.countRequestsByEventId(List.of(event.getId())).stream()
+                    .collect(Collectors.toMap(RequestDtoCount::getEvent, RequestDtoCount::getRequests));
+            event.setViews(statistic.getOrDefault(event.getId(), 0));
+            event.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0));
+        }
         return event;
     }
 
-    private Map<Long, Integer> getStatisticAsMap(List<Long> ids, Boolean unique) {
+    private Map<Long, Integer> getStatisticAsMap(List<Long> ids, Boolean unique, LocalDateTime startDate) {
         List<String> uris = ids.stream().map(k -> "/events/" + k).collect(Collectors.toList());
         try {
-            List<StatisticDto> statistic = client.get(LocalDateTime.of(2000, 1, 1, 0, 0, 0),
-                    LocalDateTime.of(2050, 12, 31, 0, 0, 0), uris, unique);
+            List<StatisticDto> statistic = client.get(startDate,
+                    LocalDateTime.now(), uris, unique);
             return statistic.stream().collect(Collectors.toMap(statsMapper::getEventId, StatisticDto::getHits));
         } catch (UnsupportedEncodingException e) {
-            throw new GettingStatisticException();
+            throw new GettingStatisticException(e.getMessage());
         }
     }
 
@@ -235,7 +260,7 @@ public class EventService {
         Map<String, List<RequestDto>> resultMap = new HashMap<>();
         List<Request> confirmedRequests = new ArrayList<>();
         List<Request> rejectedRequests = new ArrayList<>();
-        if (confirmationDto.getStatus().equals(Status.CONFIRMED)) {
+        if (confirmationDto.getStatus().equals(RequestDtoConfirmation.StatusConfirmation.CONFIRMED)) {
             for (Request request : requests) {
                 if (checkLimitForRequest(event.getParticipantLimit(), event.getConfirmedRequests())) {
                     request.setStatus(Status.CONFIRMED);
@@ -245,7 +270,7 @@ public class EventService {
                     rejectedRequests.add(requestRepository.saveAndFlush(request));
                 }
             }
-        } else if (confirmationDto.getStatus().equals(Status.REJECTED)) {
+        } else if (confirmationDto.getStatus().equals(RequestDtoConfirmation.StatusConfirmation.REJECTED)) {
             for (Request request : requests) {
                 request.setStatus(Status.REJECTED);
                 rejectedRequests.add(requestRepository.saveAndFlush(request));

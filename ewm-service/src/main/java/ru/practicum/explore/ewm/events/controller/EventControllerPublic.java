@@ -2,7 +2,9 @@ package ru.practicum.explore.ewm.events.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.ewm.events.EventService;
 import ru.practicum.explore.ewm.events.dto.EventDto;
@@ -22,11 +24,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/events")
 @RequiredArgsConstructor
+@Validated
 @Slf4j
 public class EventControllerPublic {
     private final EventService service;
     private final EventMapper mapper;
     private final StatsClient client;
+    @Value("${ewm.service.app.name}")
+    private String appName;
 
     @GetMapping
     public List<EventDtoShort> findWithConditions(@RequestParam(required = false) String text,
@@ -39,8 +44,10 @@ public class EventControllerPublic {
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                   @RequestParam(defaultValue = "10") @Positive int size,
                                                   HttpServletRequest request) {
-        log.info("client ip: {}", request.getRemoteAddr());
-        client.post(new HitDto(null, "ewm-app", "/events", request.getRemoteAddr(), LocalDateTime.now()));
+        log.info("Public: client ip: {}, appName={}", request.getRemoteAddr(), appName);
+        client.post(new HitDto(null, appName, "/events", request.getRemoteAddr(), LocalDateTime.now()));
+        log.info("Public: get events from {} size {}, where text={}, category in:{}, paid={}, event date between ({} - {}), only available={}, sort by {}",
+                from, size, text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort);
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
         }
@@ -55,8 +62,9 @@ public class EventControllerPublic {
 
     @GetMapping("/{id}")
     public EventDto getById(@PathVariable Long id, HttpServletRequest request) {
-        log.info("client ip: {}", request.getRemoteAddr());
-        client.post(new HitDto(null, "ewm-app", "/events/" + id, request.getRemoteAddr(), LocalDateTime.now()));
+        log.info("Public: client ip: {}, appName={}", request.getRemoteAddr(), appName);
+        client.post(new HitDto(null, appName, "/events/" + id, request.getRemoteAddr(), LocalDateTime.now()));
+        log.info("Public: get event with id={}", id);
         return mapper.fromEventToDto(service.findByIdPublished(id));
     }
 

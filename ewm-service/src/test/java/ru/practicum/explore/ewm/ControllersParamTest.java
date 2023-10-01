@@ -21,6 +21,7 @@ import ru.practicum.explore.ewm.requests.RequestService;
 import ru.practicum.explore.ewm.requests.dto.RequestMapper;
 import ru.practicum.explore.ewm.users.UserService;
 import ru.practicum.explore.ewm.users.dto.UserMapper;
+import ru.practicum.explore.stats.client.StatsClient;
 
 import java.nio.charset.StandardCharsets;
 
@@ -64,6 +65,8 @@ public class ControllersParamTest {
 
     @MockBean
     private RequestService requestService;
+    @MockBean
+    private StatsClient client;
 
     private MockMvc mvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -71,12 +74,10 @@ public class ControllersParamTest {
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(wac).build();
-//        objectMapper.registerModule(new JavaTimeModule());
-//        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Test
-    void getUsers_whenWrongFrom() throws Exception {
+    void userControllerAdmin_getUsers_whenWrongFrom() throws Exception {
         mvc.perform(get("/admin/users")
                         .param("from", "-4")
                         .param("size", "20")
@@ -91,7 +92,7 @@ public class ControllersParamTest {
     }
 
     @Test
-    void postRequestPrivateController() throws Exception {
+    void requestControllerPrivate_post() throws Exception {
         mvc.perform(post("/users/{userId}/requests", 1L)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -100,4 +101,33 @@ public class ControllersParamTest {
                 .andExpect(jsonPath("$.status", is("BAD_REQUEST")));
 
     }
+
+    @Test
+    void categoryControllerPublic_getCategories_whenWrongFrom() throws Exception {
+        mvc.perform(get("/categories")
+                        .param("from", "-1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
+                .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
+                .andExpect(jsonPath("$.message", is("getCategories.from: must be greater than or equal to 0")))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void categoryControllerPublic_getCategories_whenWrongSize() throws Exception {
+        mvc.perform(get("/categories")
+                        .param("size", "0")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
+                .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
+                .andExpect(jsonPath("$.message", is("getCategories.size: must be greater than 0")))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
 }

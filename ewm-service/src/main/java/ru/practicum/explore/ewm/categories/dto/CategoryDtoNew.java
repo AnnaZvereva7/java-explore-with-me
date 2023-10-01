@@ -13,5 +13,5 @@ import javax.validation.constraints.Size;
 public class CategoryDtoNew {
     @NotBlank(message = "must be not blank")
     @Size(max = 50, message = "Max size 50")
-    String name;
+    private String name;
 }

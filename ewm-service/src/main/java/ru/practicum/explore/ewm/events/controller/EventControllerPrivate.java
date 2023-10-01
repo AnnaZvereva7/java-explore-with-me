@@ -22,7 +22,6 @@ import ru.practicum.explore.ewm.users.UserService;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,7 +42,7 @@ public class EventControllerPrivate {
     public List<EventDtoShort> getEventsByUser(@PathVariable Long userId,
                                                @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info("get list of event with initiator.id {} from{} size{}", userId, from, size);
+        log.info("Private: get list of event with initiator.id {} from{} size{}", userId, from, size);
         return service.findByUserId(userId, from, size)
                 .stream()
                 .map(mapper::fromEventToDtoShort)
@@ -54,7 +53,7 @@ public class EventControllerPrivate {
     @ResponseStatus(HttpStatus.CREATED)
     public EventDto addEvent(@PathVariable Long userId,
                              @RequestBody @Validated(Marker.OnCreate.class) EventDtoRequest dto) {
-        log.info("Add new event title {} by user {}", dto.getTitle(), userId);
+        log.info("Private: add new event {} by user {}", dto, userId);
         service.checkEvenDate(dto.getEventDate(), 2);
         User initiator = userService.findById(userId);
         Category category = categoryService.findById(dto.getCategoryId());
@@ -64,23 +63,23 @@ public class EventControllerPrivate {
 
     @GetMapping("/{eventId}")
     public EventDto getEventById(@PathVariable Long eventId,
-                                 @PathVariable Long userId) throws UnsupportedEncodingException {
-        log.info("Get event with id {} by user with id {}", eventId, userId);
+                                 @PathVariable Long userId) {
+        log.info("Private: get event with id {} by user with id {}", eventId, userId);
         return mapper.fromEventToDto(service.findEventByIdAndUserFull(eventId, userId));
     }
 
     @PatchMapping("/{eventId}")
     public EventDto updateEvent(@PathVariable Long eventId,
                                 @PathVariable Long userId,
-                                @RequestBody @Validated(Marker.OnUpdate.class) EventDtoRequest dto) throws UnsupportedEncodingException {
-        log.info("Update information about event id {}", eventId);
+                                @RequestBody @Validated(Marker.OnUpdate.class) EventDtoRequest dto) {
+        log.info("Private: update information about event id {} by user.id={}, new information {}", eventId, userId, dto);
         return mapper.fromEventToDto(service.updateByOwner(dto, userId, eventId));
     }
 
     @GetMapping("/{eventId}/requests")
     public List<Object> getRequestsByEventId(@PathVariable Long eventId,
                                              @PathVariable Long userId) {
-        log.info("Get all request for event id {}", eventId);
+        log.info("Private: get all request for event id {}", eventId);
         return service.findRequestsByEventId(eventId, userId)
                 .stream()
                 .map(requestMapper::fromRequestToDto)
@@ -91,6 +90,7 @@ public class EventControllerPrivate {
     public Map<String, List<RequestDto>> moderateRequests(@PathVariable Long eventId,
                                                           @PathVariable Long userId,
                                                           @RequestBody RequestDtoConfirmation confirmationDto) {
+        log.info("Private: moderation requests vent.id ={}, user.id={}, confirmationDto={}", eventId, userId, confirmationDto);
         return service.requestConfirmation(confirmationDto, userId, eventId);
     }
 }

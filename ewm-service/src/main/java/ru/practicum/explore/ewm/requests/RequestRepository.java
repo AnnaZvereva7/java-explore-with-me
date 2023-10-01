@@ -9,6 +9,7 @@ import ru.practicum.explore.ewm.requests.model.Status;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
     @Query(value = "SELECT e.id as event, count(r.id) as requests FROM events e inner JOIN requests r ON r.event_id=e.id " +
@@ -22,5 +23,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     List<Request> findByEventIdOrderById(Long eventId);
 
-    List<Request> findByIdInAndStatus(List<Long> ids, Status status);
+    List<Request> findByIdInAndStatus(Set<Long> ids, Status status);
 }

@@ -9,7 +9,10 @@ import ru.practicum.explore.ewm.events.EventService;
 import ru.practicum.explore.ewm.events.model.Event;
 import ru.practicum.explore.ewm.exceptions.NotFoundException;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +25,9 @@ public class CompilationService {
     }
 
     public Compilation findComp(Long id) {
-        Compilation comp = repository.findById(id).orElseThrow(() -> new NotFoundException("Compilation with id=" + id + " was not found"));
-        List<Event> events = eventService.addViewsAndCountRequests(comp.getEventsList());
-        comp.setEventsList(events);
+        Compilation comp = repository.findByIdFull(id).orElseThrow(() -> new NotFoundException("Compilation with id=" + id + " was not found"));
+        List<Event> events = eventService.addViewsAndCountRequests(new ArrayList<>(comp.getEventsList()));
+        comp.setEventsList(new HashSet<>(events));
         return comp;
     }
 
@@ -33,7 +36,9 @@ public class CompilationService {
     }
 
     public void deleteComp(Long compId) {
-        repository.findById(compId).orElseThrow(() -> new NotFoundException("Compilation with id=" + compId + " was not found"));
+        if (!repository.existsById(compId)) {
+            throw new NotFoundException("Compilation with id=" + compId + " was not found");
+        }
         repository.deleteById(compId);
     }
 
@@ -47,20 +52,10 @@ public class CompilationService {
 
     private Compilation updateEventList(Compilation comp, CompilationDtoRequest dto) {
         if (dto.getEvents() == null || dto.getEvents().isEmpty()) {
-            comp.setEventsList(List.of());
+            comp.setEventsList(Set.of());
         } else {
-            List<Long> eventIdsNew = dto.getEvents();
-            for (Event event : comp.getEventsList()) {
-                if (eventIdsNew.contains(event.getId())) {
-                    eventIdsNew.remove(event.getId());
-                } else {
-                    comp.getEventsList().remove(event);
-                }
-            }
-            if (!eventIdsNew.isEmpty()) {
-                List<Event> addition = eventService.findByIdIn(eventIdsNew);
-                comp.getEventsList().addAll(addition);
-            }
+            Set<Event> newSetEvents = eventService.findByIdInSet(dto.getEvents());
+            comp.setEventsList(newSetEvents);
         }
         return comp;
     }

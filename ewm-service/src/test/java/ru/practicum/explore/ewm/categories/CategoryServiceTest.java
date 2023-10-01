@@ -78,7 +78,7 @@ class CategoryServiceTest {
 
     @Test
     void delete_whenWrongId() {
-        when(repository.findById(1)).thenReturn(Optional.empty());
+        when(repository.existsById(1)).thenReturn(false);
         Throwable thrown = catchThrowable(() -> {
             service.delete(1);
         });
@@ -87,7 +87,7 @@ class CategoryServiceTest {
 
     @Test
     void delete_whenOk() {
-        when(repository.findById(1)).thenReturn(Optional.of(cat));
+        when(repository.existsById(1)).thenReturn(true);
         doNothing().when(repository).deleteById(1);
         service.delete(1);
         verify(repository, times(1)).deleteById(1);

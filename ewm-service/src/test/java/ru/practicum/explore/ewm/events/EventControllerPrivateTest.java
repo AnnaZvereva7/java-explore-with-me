@@ -69,6 +69,21 @@ class EventControllerPrivateTest {
     }
 
     @Test
+    void addEvent_whenWrongLocation() throws Exception {
+        EventDtoRequest dto = new EventDtoRequest("title", "annotationannotationannotation", "descriptiondescriptiondescription", 1, now.plusDays(1), new LocationDto(200f, 45.12f), true, 10, true, null);
+        mvc.perform(post("/users/{userId}/events", 1L)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
+                .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
+                .andExpect(jsonPath("$.message", is("must be less than or equal to 90")))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
     void addEvent_when1HourBeforeEvent() throws Exception {
         EventDtoRequest dto = new EventDtoRequest("title", "annotationannotationannotation", "descriptiondescriptiondescriptiondescription", 1, now.plusHours(1), new LocationDto(56.15f, 45.12f), true, 10, true, null);
         doThrow(new EventDateException(now.plusHours(1))).when(service).checkEvenDate(now.plusHours(1), 2);

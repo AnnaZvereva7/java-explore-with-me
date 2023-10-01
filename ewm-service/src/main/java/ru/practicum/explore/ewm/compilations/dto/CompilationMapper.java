@@ -6,7 +6,7 @@ import ru.practicum.explore.ewm.compilations.Compilation;
 import ru.practicum.explore.ewm.events.dto.EventMapper;
 import ru.practicum.explore.ewm.events.model.Event;
 
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -16,10 +16,10 @@ public class CompilationMapper {
 
     public CompilationDto fromCompilationToDto(Compilation comp) {
         return new CompilationDto(comp.getId(), comp.getTitle(), comp.getPinned(),
-                comp.getEventsList().stream().map(eventMapper::fromEventToDtoShort).collect(Collectors.toList()));
+                comp.getEventsList().stream().map(eventMapper::fromEventToDtoShort).collect(Collectors.toSet()));
     }
 
-    public Compilation fromDtoRequestToCompilation(CompilationDtoRequest dto, List<Event> events) {
+    public Compilation fromDtoRequestToCompilation(CompilationDtoRequest dto, Set<Event> events) {
         return new Compilation(null, dto.getTitle(), dto.getPinned() == null ? false : dto.getPinned(), events);
     }
 }

@@ -1,6 +1,7 @@
 package ru.practicum.explore.stats.client;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -22,6 +23,7 @@ public class StatsClient {
     private final String baseUrl;
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd%20HH:mm:ss");
 
+    @Autowired
     public StatsClient(String baseUrl) {
         this.baseUrl = baseUrl;
         this.rest = new RestTemplateBuilder().uriTemplateHandler(new DefaultUriBuilderFactory(baseUrl))
