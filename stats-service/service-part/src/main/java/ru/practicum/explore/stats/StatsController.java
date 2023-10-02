@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.stats.dto.HitDto;
 import ru.practicum.explore.stats.dto.StatisticDto;
+import ru.practicum.explore.stats.dto.StatsMapper;
 import ru.practicum.explore.stats.exception.WrongPeriodException;
 
 import javax.validation.Valid;
@@ -23,12 +23,13 @@ import java.util.stream.Collectors;
 public class StatsController {
     private final StatsService statsService;
     private final HitMapper mapper;
+    private final StatsMapper statsMapper;
 
     @PostMapping("/hit")
-    public ResponseEntity<Void> addHit(@RequestBody @Valid HitDto hit) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public HitDto addHit(@RequestBody @Valid HitDto hit) {
         log.info("Get hit app={}, uri={}, ip={}, timeshtamp={}", hit.getApp(), hit.getUri(), hit.getIp(), hit.getRequestTime());
-        statsService.addHit(mapper.fromHitDto(hit));
-        return new ResponseEntity<>(HttpStatus.OK);
+        return mapper.toHitDto(statsService.addHit(mapper.fromHitDto(hit)));
     }
 
     @GetMapping("/stats")
@@ -36,7 +37,7 @@ public class StatsController {
                                            @RequestParam(name = "end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
                                            @RequestParam(name = "uris", required = false) List<String> uris,
                                            @RequestParam(defaultValue = "false", name = "unique") boolean unique) {
-        if (start.isAfter(end) || start.isEqual(end)) {
+        if (start.isAfter(end)) {
             throw new WrongPeriodException();
         }
         log.info("Get statistic period from {} to {}, uris: {}, unique= {}", start, end, uris, unique);
@@ -47,9 +48,11 @@ public class StatsController {
                 return List.of();
             }
         }
-        return statsService.getStatistic(start, end, uris, unique)
+        List<StatisticDto> result = statsService.getStatistic(start, end, uris, unique)
                 .stream()
-                .map(StatisticDto::new)
+                .map(statsMapper::fromInterface)
                 .collect(Collectors.toList());
+        log.info("return list of statistics {}", result);
+        return result;
     }
 }

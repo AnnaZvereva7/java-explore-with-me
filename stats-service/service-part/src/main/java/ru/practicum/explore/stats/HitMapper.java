@@ -1,9 +1,11 @@
 package ru.practicum.explore.stats;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.stats.dto.HitDto;
 
 @Service
+@Slf4j
 public class HitMapper {
 
     public HitDto toHitDto(Hit hit) {
@@ -17,6 +19,8 @@ public class HitMapper {
     }
 
     public Hit fromHitDto(HitDto hitDto) {
-        return new Hit(null, hitDto.getApp(), hitDto.getUri(), hitDto.getIp(), hitDto.getRequestTime());
+        Hit hit = new Hit(null, hitDto.getApp(), hitDto.getUri(), hitDto.getIp(), hitDto.getRequestTime());
+        log.info("save new hit {}", hit);
+        return hit;
     }
 }
