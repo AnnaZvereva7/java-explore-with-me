@@ -1,0 +1,1055 @@
+{
+	"info": {
+		"_postman_id": "b461db30-4657-49d7-9105-6e0343190a7d",
+		"name": "Test Feature Admin Moderation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29936589"
+	},
+	"item": [
+		{
+			"name": "Add category",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const source = JSON.parse(pm.request.body.raw);",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Категория должна содержать поля: id, name\", function () {",
+							"pm.expect(target).to.have.property('id');",
+							"pm.expect(target).to.have.property('name');",
+							"});",
+							"",
+							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {",
+							"    pm.expect(target.id).to.not.be.null;",
+							"    pm.expect(source.name).equal(target.name, 'Название категории должно совпадать с отправленным');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Концерты\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/categories",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const source = JSON.parse(pm.request.body.raw);",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Пользователь должн содержать поля: id, name, email\", function () {",
+							"pm.expect(target).to.have.property('id');",
+							"pm.expect(target).to.have.property('name');",
+							"pm.expect(target).to.have.property('email');",
+							"});",
+							"",
+							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {",
+							"    pm.expect(target.id).to.not.be.null;",
+							"    pm.expect(source.name).equal(target.name, 'Имя пользователя должно совпадать с отправленным');",
+							"    pm.expect(source.email).equal(target.email, 'Почта пользователя должно совпадать с отправленной');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"ivan.petrov@practicummail.ru\",\n  \"name\": \"Иван Петров\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get list of event for moderation (when empty)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
+							"    pm.response.to.be.ok;    ",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Test List event response\", function () {",
+							"pm.expect(target.length, 'List length must be 0').to.eql(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/admin/events/moderation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"moderation"
+					],
+					"query": [
+						{
+							"key": "withAdminComment",
+							"value": "true",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const source = JSON.parse(pm.request.body.raw);",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Событие должно содержать поля: id, title, annotation, category, paid, eventDate, initiator, description, participantLimit, state, createdOn, location, requestModeration\", function () {",
+							"pm.expect(target).to.have.property('id');",
+							"pm.expect(target).to.have.property('title');",
+							"pm.expect(target).to.have.property('annotation');",
+							"pm.expect(target).to.have.property('category');",
+							"pm.expect(target).to.have.property('description');",
+							"pm.expect(target).to.have.property('eventDate');",
+							"pm.expect(target).to.have.property('location');",
+							"pm.expect(target).to.have.property('paid');",
+							"pm.expect(target).to.have.property('participantLimit');",
+							"pm.expect(target).to.have.property('requestModeration');",
+							"});",
+							"",
+							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {",
+							"    pm.expect(target.id).to.not.be.null;",
+							"    pm.expect(target.title).equal(source.title, 'Название события должно соответствовать названию события в запросе');",
+							"    pm.expect(target.annotation).equal(source.annotation, 'Аннотация события должна соответствовать аннотации события в запросе');",
+							"    pm.expect(target.paid.toString()).equal(source.paid.toString(), 'Стоимость события должна соответствовать стоимости события в запросе');",
+							"    pm.expect(target.eventDate).equal(source.eventDate, 'Дата проведения события должна соответствовать дате проведения события в запросе');",
+							"    pm.expect(target.description).equal(source.description, 'Описание события должно соответствовать описание события в запросе');",
+							"    pm.expect(target.participantLimit.toString()).equal(source.participantLimit.toString(), 'Лимит участников события должно соответствовать лимиту участников события в запросе');",
+							"    pm.expect(target.location.lat.toString()).equal(source.location.lat.toString(), 'Широта локации проведения события должна соответствовать широте локации проведения события в запросе');",
+							"    pm.expect(target.location.lon.toString()).equal(source.location.lon.toString(), 'Долгота локации проведения события должна соответствовать долготе локации проведения события в запросе');",
+							"    pm.expect(target.requestModeration.toString()).equal(source.requestModeration.toString(), 'Необходимость модерации события должна соответствовать необходимости модерации события в запросе');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"annotation\": \"Сплав на байдарках похож на полет.\",\n  \"category\": 1,\n  \"description\": \"Сплав на байдарках похож на полет. На спокойной воде — это парение. На бурной, порожистой — выполнение фигур высшего пилотажа. И то, и другое дарят чувство обновления, феерические эмоции, яркие впечатления.\",\n  \"eventDate\": \"2024-12-31 15:10:05\",\n  \"location\": {\n    \"lat\": 55.754167,\n    \"lon\": 37.62\n  },\n  \"paid\": true,\n  \"participantLimit\": 10,\n  \"requestModeration\": false,\n  \"title\": \"Сплав на байдарках\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/1/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"1",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get list of event for moderation (when 1 event withoutcomment)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
+							"    pm.response.to.be.ok;    ",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Test List event response\", function () {",
+							"pm.expect(target.length, 'List length must be 1').to.eql(1);",
+							"});",
+							"",
+							"pm.test(\"Test data of events\", function () {",
+							"  pm.expect(target[0]).to.have.property('id');",
+							"  pm.expect(target[0].id).to.be.eql(1);",
+							"  pm.expect(target[0]).to.have.property('title');",
+							"  pm.expect(target[0].title).to.be.eql('Сплав на байдарках');",
+							"  pm.expect(target[0]).to.have.property('annotation');",
+							"  pm.expect(target[0].annotation).to.be.eql('Сплав на байдарках похож на полет.');",
+							"  pm.expect(target[0]).to.have.property('description');",
+							"  pm.expect(target[0]).to.have.property('category');",
+							"  pm.expect(target[0].category).to.have.property('id');",
+							"  pm.expect(target[0].category.id).to.be.eql(1);",
+							"  pm.expect(target[0].category).to.have.property('name');",
+							"  pm.expect(target[0].category.name).to.be.eql('Концерты');",
+							"  pm.expect(target[0]).to.have.property('eventDate');",
+							"  pm.expect(target[0].eventDate).to.be.eql('2024-12-31 15:10:05')",
+							"  pm.expect(target[0]).to.have.property('location');",
+							"  pm.expect(target[0].location).to.have.property('lat');",
+							"  pm.expect(target[0].location).to.have.property('lon');",
+							"  pm.expect(target[0]).to.have.property('paid');",
+							"  pm.expect(target[0].paid).to.be.eql(true);",
+							"  pm.expect(target[0]).to.have.property('participantLimit');",
+							"  pm.expect(target[0]).to.have.property('requestModeration');",
+							"  pm.expect(target[0]).to.have.property('state');",
+							"  pm.expect(target[0]).to.have.property('initiator');",
+							"  pm.expect(target[0].initiator).to.have.property('id');",
+							"  pm.expect(target[0].initiator.id).to.be.eql(1);",
+							"  pm.expect(target[0].initiator).to.have.property('name');",
+							"  pm.expect(target[0].initiator.name).to.be.eql('Иван Петров');",
+							"  pm.expect(target[0]).to.have.property('createdOn');",
+							"  pm.expect(target[0]).to.have.property('publishedOn');",
+							"  pm.expect(target[0].publishedOn).to.be.eql(null);",
+							"  pm.expect(target[0]).to.have.property('confirmedRequests');",
+							"  pm.expect(target[0]).to.have.property('views');",
+							"  pm.expect(target[0]).to.have.property('adminComment');",
+							"} );"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/admin/events/moderation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"moderation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get list events with admin comment for moderation when empty",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
+							"    pm.response.to.be.ok;    ",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Test List event response\", function () {",
+							"pm.expect(target.length, 'List length must be 0').to.eql(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/admin/events/moderation?withAdminComment=true",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"moderation"
+					],
+					"query": [
+						{
+							"key": "withAdminComment",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send to revision without comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 409 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(409);    ",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Exception\", function () {",
+							"  pm.expect(target).to.have.property('status');",
+							"  pm.expect(target.status).to.be.eql('FORBIDDEN');",
+							"  pm.expect(target).to.have.property('reason');",
+							"  pm.expect(target.reason).to.be.eql('For the requested operation the conditions are not met.');",
+							"  pm.expect(target).to.have.property('message');",
+							"  pm.expect(target.message).to.be.eql('Add adminComment to send event to revision');",
+							"  pm.expect(target).to.have.property('timestamp');",
+							"} );"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"stateAction\": \"SEND_TO_REVISION\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/events/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Test data of event\", function () {",
+							"  pm.expect(target).to.have.property('id');",
+							"  pm.expect(target.id).to.be.eql(1);",
+							"  pm.expect(target).to.have.property('title');",
+							"  pm.expect(target.title).to.be.eql('Сплав на байдарках');",
+							"  pm.expect(target).to.have.property('annotation');",
+							"  pm.expect(target.annotation).to.be.eql('Сплав на байдарках похож на полет.');",
+							"  pm.expect(target).to.have.property('description');",
+							"  pm.expect(target).to.have.property('category');",
+							"  pm.expect(target.category).to.have.property('id');",
+							"  pm.expect(target.category.id).to.be.eql(1);",
+							"  pm.expect(target.category).to.have.property('name');",
+							"  pm.expect(target.category.name).to.be.eql('Концерты');",
+							"  pm.expect(target).to.have.property('eventDate');",
+							"  pm.expect(target.eventDate).to.be.eql('2024-12-31 15:10:05')",
+							"  pm.expect(target).to.have.property('location');",
+							"  pm.expect(target.location).to.have.property('lon');",
+							"  pm.expect(target).to.have.property('paid');",
+							"  pm.expect(target.paid).to.be.eql(true);",
+							"  pm.expect(target).to.have.property('participantLimit');",
+							"  pm.expect(target).to.have.property('requestModeration');",
+							"  pm.expect(target).to.have.property('state');",
+							"  pm.expect(target.state).to.be.eql('PENDING');",
+							"  pm.expect(target).to.have.property('initiator');",
+							"  pm.expect(target.initiator).to.have.property('id');",
+							"  pm.expect(target.initiator.id).to.be.eql(1);",
+							"  pm.expect(target.initiator).to.have.property('name');",
+							"  pm.expect(target.initiator.name).to.be.eql('Иван Петров');",
+							"  pm.expect(target).to.have.property('createdOn');",
+							"  pm.expect(target).to.have.property('publishedOn');",
+							"  pm.expect(target.publishedOn).to.be.eql(null);",
+							"  pm.expect(target).to.have.property('confirmedRequests');",
+							"  pm.expect(target).to.have.property('views');",
+							"  pm.expect(target).to.have.property('adminComment');",
+							"  pm.expect(target.adminComment).to.be.eql('Some comment')",
+							"} );"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"comment\": \"Some comment\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/events/1/comment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"1",
+						"comment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send to revision with comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(200);    ",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Test data of event\", function () {",
+							"  pm.expect(target).to.have.property('id');",
+							"  pm.expect(target.id).to.be.eql(1);",
+							"  pm.expect(target).to.have.property('title');",
+							"  pm.expect(target.title).to.be.eql('Сплав на байдарках');",
+							"  pm.expect(target).to.have.property('annotation');",
+							"  pm.expect(target.annotation).to.be.eql('Сплав на байдарках похож на полет.');",
+							"  pm.expect(target).to.have.property('description');",
+							"  pm.expect(target).to.have.property('category');",
+							"  pm.expect(target.category).to.have.property('id');",
+							"  pm.expect(target.category.id).to.be.eql(1);",
+							"  pm.expect(target.category).to.have.property('name');",
+							"  pm.expect(target.category.name).to.be.eql('Концерты');",
+							"  pm.expect(target).to.have.property('eventDate');",
+							"  pm.expect(target.eventDate).to.be.eql('2024-12-31 15:10:05')",
+							"  pm.expect(target).to.have.property('location');",
+							"  pm.expect(target.location).to.have.property('lon');",
+							"  pm.expect(target).to.have.property('paid');",
+							"  pm.expect(target.paid).to.be.eql(true);",
+							"  pm.expect(target).to.have.property('participantLimit');",
+							"  pm.expect(target).to.have.property('requestModeration');",
+							"  pm.expect(target).to.have.property('state');",
+							"  pm.expect(target.state).to.be.eql('REVISION');",
+							"  pm.expect(target).to.have.property('initiator');",
+							"  pm.expect(target.initiator).to.have.property('id');",
+							"  pm.expect(target.initiator.id).to.be.eql(1);",
+							"  pm.expect(target.initiator).to.have.property('name');",
+							"  pm.expect(target.initiator.name).to.be.eql('Иван Петров');",
+							"  pm.expect(target).to.have.property('createdOn');",
+							"  pm.expect(target).to.have.property('publishedOn');",
+							"  pm.expect(target.publishedOn).to.be.eql(null);",
+							"  pm.expect(target).to.have.property('confirmedRequests');",
+							"  pm.expect(target).to.have.property('views');",
+							"  pm.expect(target).to.have.property('adminComment');",
+							"  pm.expect(target.adminComment).to.be.eql('Some comment')",
+							"} );"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"stateAction\": \"SEND_TO_REVISION\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/events/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add event 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const source = JSON.parse(pm.request.body.raw);",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Событие должно содержать поля: id, title, annotation, category, paid, eventDate, initiator, description, participantLimit, state, createdOn, location, requestModeration\", function () {",
+							"pm.expect(target).to.have.property('id');",
+							"pm.expect(target).to.have.property('title');",
+							"pm.expect(target).to.have.property('annotation');",
+							"pm.expect(target).to.have.property('category');",
+							"pm.expect(target).to.have.property('description');",
+							"pm.expect(target).to.have.property('eventDate');",
+							"pm.expect(target).to.have.property('location');",
+							"pm.expect(target).to.have.property('paid');",
+							"pm.expect(target).to.have.property('participantLimit');",
+							"pm.expect(target).to.have.property('requestModeration');",
+							"});",
+							"",
+							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {",
+							"    pm.expect(target.id).to.not.be.null;",
+							"    pm.expect(target.title).equal(source.title, 'Название события должно соответствовать названию события в запросе');",
+							"    pm.expect(target.annotation).equal(source.annotation, 'Аннотация события должна соответствовать аннотации события в запросе');",
+							"    pm.expect(target.paid.toString()).equal(source.paid.toString(), 'Стоимость события должна соответствовать стоимости события в запросе');",
+							"    pm.expect(target.eventDate).equal(source.eventDate, 'Дата проведения события должна соответствовать дате проведения события в запросе');",
+							"    pm.expect(target.description).equal(source.description, 'Описание события должно соответствовать описание события в запросе');",
+							"    pm.expect(target.participantLimit.toString()).equal(source.participantLimit.toString(), 'Лимит участников события должно соответствовать лимиту участников события в запросе');",
+							"    pm.expect(target.location.lat.toString()).equal(source.location.lat.toString(), 'Широта локации проведения события должна соответствовать широте локации проведения события в запросе');",
+							"    pm.expect(target.location.lon.toString()).equal(source.location.lon.toString(), 'Долгота локации проведения события должна соответствовать долготе локации проведения события в запросе');",
+							"    pm.expect(target.requestModeration.toString()).equal(source.requestModeration.toString(), 'Необходимость модерации события должна соответствовать необходимости модерации события в запросе');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"annotation\": \"Еще одно мероприятие.\",\n  \"category\": 1,\n  \"description\": \"Сплав на байдарках похож на полет. На спокойной воде — это парение. На бурной, порожистой — выполнение фигур высшего пилотажа. И то, и другое дарят чувство обновления, феерические эмоции, яркие впечатления.\",\n  \"eventDate\": \"2024-10-31 15:10:05\",\n  \"location\": {\n    \"lat\": 55.7541,\n    \"lon\": 37.62\n  },\n  \"paid\": true,\n  \"participantLimit\": 10,\n  \"requestModeration\": false,\n  \"title\": \"Новое событие\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/1/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"1",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Group moderation Published event 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"const target = pm.response.json();",
+							"pm.test(\"Test data \", function () {",
+							"  pm.expect(target).to.have.all.keys('published','too_close_eventDate');",
+							"  pm.expect(target['published'].length).to.eql(1);",
+							"  pm.expect(target['too_close_eventDate'].length).to.eql(0);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ids\":[\n        2\n    ],\n    \"stateAction\": \"PUBLISH_EVENT\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/events/moderation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"moderation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add event 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const source = JSON.parse(pm.request.body.raw);",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Событие должно содержать поля: id, title, annotation, category, paid, eventDate, initiator, description, participantLimit, state, createdOn, location, requestModeration\", function () {",
+							"pm.expect(target).to.have.property('id');",
+							"pm.expect(target).to.have.property('title');",
+							"pm.expect(target).to.have.property('annotation');",
+							"pm.expect(target).to.have.property('category');",
+							"pm.expect(target).to.have.property('description');",
+							"pm.expect(target).to.have.property('eventDate');",
+							"pm.expect(target).to.have.property('location');",
+							"pm.expect(target).to.have.property('paid');",
+							"pm.expect(target).to.have.property('participantLimit');",
+							"pm.expect(target).to.have.property('requestModeration');",
+							"});",
+							"",
+							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {",
+							"    pm.expect(target.id).to.not.be.null;",
+							"    pm.expect(target.title).equal(source.title, 'Название события должно соответствовать названию события в запросе');",
+							"    pm.expect(target.annotation).equal(source.annotation, 'Аннотация события должна соответствовать аннотации события в запросе');",
+							"    pm.expect(target.paid.toString()).equal(source.paid.toString(), 'Стоимость события должна соответствовать стоимости события в запросе');",
+							"    pm.expect(target.eventDate).equal(source.eventDate, 'Дата проведения события должна соответствовать дате проведения события в запросе');",
+							"    pm.expect(target.description).equal(source.description, 'Описание события должно соответствовать описание события в запросе');",
+							"    pm.expect(target.participantLimit.toString()).equal(source.participantLimit.toString(), 'Лимит участников события должно соответствовать лимиту участников события в запросе');",
+							"    pm.expect(target.location.lat.toString()).equal(source.location.lat.toString(), 'Широта локации проведения события должна соответствовать широте локации проведения события в запросе');",
+							"    pm.expect(target.location.lon.toString()).equal(source.location.lon.toString(), 'Долгота локации проведения события должна соответствовать долготе локации проведения события в запросе');",
+							"    pm.expect(target.requestModeration.toString()).equal(source.requestModeration.toString(), 'Необходимость модерации события должна соответствовать необходимости модерации события в запросе');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"annotation\": \"Еще одно мероприятие3.\",\n  \"category\": 1,\n  \"description\": \"Сплав на байдарках похож на полет. На спокойной воде — это парение. На бурной, порожистой — выполнение фигур высшего пилотажа. И то, и другое дарят чувство обновления, феерические эмоции, яркие впечатления.\",\n  \"eventDate\": \"2024-10-30 15:10:05\",\n  \"location\": {\n    \"lat\": 55.7541,\n    \"lon\": 37.62\n  },\n  \"paid\": true,\n  \"participantLimit\": 10,\n  \"requestModeration\": false,\n  \"title\": \"Новое событие3\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/1/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"1",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Group moderation Revision when no comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Test data \", function () {",
+							"  pm.expect(target).to.have.all.keys('Need_comment_by_admin','Sent_to_revision');",
+							"  pm.expect(target['Need_comment_by_admin'].length).to.eql(1);",
+							"  pm.expect(target['Sent_to_revision'].length).to.eql(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ids\":[\n        3\n    ],\n    \"stateAction\": \"SEND_TO_REVISION\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/events/moderation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"moderation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Group moderation Revision when no events",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 400 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(400);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Exception\", function () {",
+							"  pm.expect(target).to.have.property('status');",
+							"  pm.expect(target.status).to.be.eql('BAD_REQUEST');",
+							"  pm.expect(target).to.have.property('reason');",
+							"  pm.expect(target.reason).to.be.eql('Incorrectly made request.');",
+							"  pm.expect(target).to.have.property('message');",
+							"  pm.expect(target.message).to.be.eql('must be not empty');",
+							"  pm.expect(target).to.have.property('timestamp');",
+							"} );"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ids\":[],\n    \"stateAction\": \"SEND_TO_REVISION\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/events/moderation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"moderation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add comment event 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Test data of event\", function () {",
+							"  pm.expect(target).to.have.property('id');",
+							"  pm.expect(target.id).to.be.eql(3);",
+							"  pm.expect(target).to.have.property('title');",
+							"  pm.expect(target.title).to.be.eql('Новое событие3');",
+							"  pm.expect(target).to.have.property('annotation');",
+							"  pm.expect(target.annotation).to.be.eql('Еще одно мероприятие3.');",
+							"  pm.expect(target).to.have.property('description');",
+							"  pm.expect(target).to.have.property('category');",
+							"  pm.expect(target.category).to.have.property('id');",
+							"  pm.expect(target.category.id).to.be.eql(1);",
+							"  pm.expect(target.category).to.have.property('name');",
+							"  pm.expect(target.category.name).to.be.eql('Концерты');",
+							"  pm.expect(target).to.have.property('eventDate');",
+							"  pm.expect(target.eventDate).to.be.eql('2024-10-30 15:10:05')",
+							"  pm.expect(target).to.have.property('location');",
+							"  pm.expect(target.location).to.have.property('lon');",
+							"  pm.expect(target).to.have.property('paid');",
+							"  pm.expect(target.paid).to.be.eql(true);",
+							"  pm.expect(target).to.have.property('participantLimit');",
+							"  pm.expect(target).to.have.property('requestModeration');",
+							"  pm.expect(target).to.have.property('state');",
+							"  pm.expect(target.state).to.be.eql('PENDING');",
+							"  pm.expect(target).to.have.property('initiator');",
+							"  pm.expect(target.initiator).to.have.property('id');",
+							"  pm.expect(target.initiator.id).to.be.eql(1);",
+							"  pm.expect(target.initiator).to.have.property('name');",
+							"  pm.expect(target.initiator.name).to.be.eql('Иван Петров');",
+							"  pm.expect(target).to.have.property('createdOn');",
+							"  pm.expect(target).to.have.property('publishedOn');",
+							"  pm.expect(target.publishedOn).to.be.eql(null);",
+							"  pm.expect(target).to.have.property('confirmedRequests');",
+							"  pm.expect(target).to.have.property('views');",
+							"  pm.expect(target).to.have.property('adminComment');",
+							"  pm.expect(target.adminComment).to.be.eql('Some comment3')",
+							"} );"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"comment\": \"Some comment3\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/events/3/comment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"3",
+						"comment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Group moderation Revision with comment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const target = pm.response.json();",
+							"pm.test(\"Test data2 \", function () {",
+							"  pm.expect(target).to.have.all.keys('Need_comment_by_admin','Sent_to_revision');",
+							"  pm.expect(target['Need_comment_by_admin'].length).to.eql(0);",
+							"  pm.expect(target['Sent_to_revision'].length).to.eql(1);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ids\":[\n        3\n    ],\n    \"stateAction\": \"SEND_TO_REVISION\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin/events/moderation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"events",
+						"moderation"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
