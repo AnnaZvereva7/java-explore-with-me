@@ -32,7 +32,8 @@ participant_limit INT NOT NULL,
 state VARCHAR(10) NOT NULL,
 initiator_id BIGINT REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 created_on TIMESTAMP NOT NULL,
-published_on TIMESTAMP
+published_on TIMESTAMP,
+admin_comment VARCHAR(7000)
 );
 
 CREATE TABLE IF NOT EXISTS requests (

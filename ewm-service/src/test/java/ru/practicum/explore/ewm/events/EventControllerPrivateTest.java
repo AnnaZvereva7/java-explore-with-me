@@ -11,19 +11,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.practicum.explore.ewm.common.CommonConstant;
 import ru.practicum.explore.ewm.events.controller.EventControllerPrivate;
-import ru.practicum.explore.ewm.events.dto.EventDtoRequest;
 import ru.practicum.explore.ewm.events.dto.EventMapper;
 import ru.practicum.explore.ewm.events.dto.LocationDto;
+import ru.practicum.explore.ewm.events.dto.request.EventDtoRequestCreate;
 import ru.practicum.explore.ewm.exceptions.ErrorHandler;
-import ru.practicum.explore.ewm.exceptions.EventDateException;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,7 +53,8 @@ class EventControllerPrivateTest {
 
     @Test
     void addEvent_whenWrongDto() throws Exception {
-        EventDtoRequest dto = new EventDtoRequest("    ", "annotationannotationannotation", "descriptiondescriptiondescription", 1, now.plusDays(1), new LocationDto(56.15f, 45.12f), true, 10, true, null);
+        EventDtoRequestCreate dto = new EventDtoRequestCreate("    ", "annotationannotationannotation", "descriptiondescriptiondescription",
+                1, now.plusDays(1), new LocationDto(new BigDecimal(56.12), new BigDecimal(45.12)), true, 10, true);
         mvc.perform(post("/users/{userId}/events", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
@@ -70,7 +69,8 @@ class EventControllerPrivateTest {
 
     @Test
     void addEvent_whenWrongLocation() throws Exception {
-        EventDtoRequest dto = new EventDtoRequest("title", "annotationannotationannotation", "descriptiondescriptiondescription", 1, now.plusDays(1), new LocationDto(200f, 45.12f), true, 10, true, null);
+        EventDtoRequestCreate dto = new EventDtoRequestCreate("title", "annotationannotationannotation", "descriptiondescriptiondescription",
+                1, now.plusDays(1), new LocationDto(new BigDecimal(200), new BigDecimal(45.12)), true, 10, true);
         mvc.perform(post("/users/{userId}/events", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
@@ -85,8 +85,8 @@ class EventControllerPrivateTest {
 
     @Test
     void addEvent_when1HourBeforeEvent() throws Exception {
-        EventDtoRequest dto = new EventDtoRequest("title", "annotationannotationannotation", "descriptiondescriptiondescriptiondescription", 1, now.plusHours(1), new LocationDto(56.15f, 45.12f), true, 10, true, null);
-        doThrow(new EventDateException(now.plusHours(1))).when(service).checkEvenDate(now.plusHours(1), 2);
+        EventDtoRequestCreate dto = new EventDtoRequestCreate("title", "annotationannotationannotation", "descriptiondescriptiondescriptiondescription",
+                1, now.plusHours(1), new LocationDto(new BigDecimal(56.15), new BigDecimal(45.12)), true, 10, true);
         mvc.perform(post("/users/{userId}/events", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
@@ -95,7 +95,7 @@ class EventControllerPrivateTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
                 .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
-                .andExpect(jsonPath("$.message", is("Field: eventDate. Error: должно содержать дату, которая еще не наступила. Value: " + now.plusHours(1).format(CommonConstant.FORMATTER))))
+                .andExpect(jsonPath("$.message", is("Must be more then 2 hour before event start")))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 

@@ -6,6 +6,7 @@ import ru.practicum.explore.ewm.compilations.Compilation;
 import ru.practicum.explore.ewm.users.User;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,9 +34,9 @@ public class Event {
     @Column(nullable = false, name = "event_date")
     private LocalDateTime eventDate;
     @Column(nullable = false)
-    private Float lat;
+    private BigDecimal lat;
     @Column(nullable = false)
-    private Float lon;
+    private BigDecimal lon;
     @Column(nullable = false)
     private Boolean paid;
     @Column(name = "participant_limit")
@@ -57,6 +58,8 @@ public class Event {
     @Transient
     @EqualsAndHashCode.Exclude
     private List<Compilation> compilations;
+    @Column(name = "admin_comment")
+    private String adminComment;
 
     @Transient
     @EqualsAndHashCode.Exclude

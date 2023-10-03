@@ -6,11 +6,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.ewm.categories.CategoryService;
 import ru.practicum.explore.ewm.common.OffsetBasedPageRequest;
-import ru.practicum.explore.ewm.events.dto.EventDtoRequest;
+import ru.practicum.explore.ewm.events.dto.EventDtoWithAdminComment;
+import ru.practicum.explore.ewm.events.dto.EventMapper;
+import ru.practicum.explore.ewm.events.dto.request.*;
 import ru.practicum.explore.ewm.events.model.Event;
 import ru.practicum.explore.ewm.events.model.EventSort;
 import ru.practicum.explore.ewm.events.model.State;
-import ru.practicum.explore.ewm.events.model.StateAction;
+import ru.practicum.explore.ewm.events.model.stateAction.StateActionAdmin;
+import ru.practicum.explore.ewm.events.model.stateAction.StateActionUser;
 import ru.practicum.explore.ewm.exceptions.*;
 import ru.practicum.explore.ewm.requests.RequestRepository;
 import ru.practicum.explore.ewm.requests.dto.RequestDto;
@@ -38,6 +41,7 @@ public class EventService {
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
     private final StatsMapper statsMapper;
+    private final EventMapper eventMapper;
     private Sort sort = Sort.by("id").ascending();
 
     public Event addEvent(Event event) {
@@ -54,41 +58,64 @@ public class EventService {
         return addViewsAndCountRequests(event);
     }
 
-    public Event updateByOwner(EventDtoRequest dto, Long userId, Long eventId) {
+    public Event updateByOwner(EventDtoRequestUpdateUser dto, Long userId, Long eventId) {
         Event event = repository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
         if (event.getState() == State.PUBLISHED) {
             throw new AccessException("Event must not be published");
         }
         event = updateInformation(dto, event);
-        if (dto.getStateAction() != null && dto.getStateAction().equals(StateAction.CANCEL_REVIEW) && event.getState().equals(State.PENDING)) {
+        if (dto.getEventDate() != null) {
+            event.setEventDate(dto.getEventDate());
+        }
+        if (dto.getStateAction() != null && dto.getStateAction().equals(StateActionUser.CANCEL_REVIEW)
+                && (event.getState().equals(State.PENDING) || event.getState().equals(State.REVISION))) {
             event.setState(State.CANCELED);
-        } else if (dto.getStateAction() != null && dto.getStateAction().equals(StateAction.SEND_TO_REVIEW) && event.getState().equals(State.CANCELED)) {
-            checkEvenDate(event.getEventDate(), 2);
+        } else if (dto.getStateAction() != null && dto.getStateAction().equals(StateActionUser.SEND_TO_REVIEW)
+                && (event.getState().equals(State.CANCELED) || event.getState().equals(State.REVISION))) {
+            if (!checkEvenDate(event.getEventDate(), 2)) {
+                throw new EventDateException(event.getEventDate());
+            }
             event.setState(State.PENDING);
         }
         return repository.saveAndFlush(event);
     }
 
-    public Event updateByAdmin(EventDtoRequest dto, Long eventId) {
+    public Event updateByAdmin(EventDtoRequestUpdateAdmin dto, Long eventId) {
         log.info("update {}", dto);
         Event event = findByIdAllState(eventId);
         event = updateInformation(dto, event);
+        if (dto.getAdminComment() != null) {
+            event.setAdminComment(dto.getAdminComment());
+        }
+        if (dto.getEventDate() != null) {
+            event.setEventDate(dto.getEventDate());
+        }
         if (dto.getStateAction() == null) {
             return repository.saveAndFlush(event);
-        } else if (dto.getStateAction().equals(StateAction.PUBLISH_EVENT) && event.getState().equals(State.PENDING)) {
-            checkEvenDate(event.getEventDate(), 1);
+        } else if (dto.getStateAction().equals(StateActionAdmin.PUBLISH_EVENT) && event.getState().equals(State.PENDING)) {
+            if (!checkEvenDate(event.getEventDate(), 1)) {
+                throw new EventDateException(event.getEventDate());
+            }
             event.setPublishedOn(LocalDateTime.now());
             event.setState(State.PUBLISHED);
             return repository.saveAndFlush(event);
-        } else if (dto.getStateAction().equals(StateAction.REJECT_EVENT) && event.getState().equals(State.PENDING)) {
+        } else if (dto.getStateAction().equals(StateActionAdmin.REJECT_EVENT) && event.getState().equals(State.PENDING)) {
             event.setState(State.CANCELED);
-            return event = repository.saveAndFlush(event);
+            return repository.saveAndFlush(event);
+        } else if (dto.getStateAction().equals(StateActionAdmin.SEND_TO_REVISION)
+                && event.getState().equals(State.PENDING)) {
+            if (event.getAdminComment() != null) {
+                event.setState(State.REVISION);
+                return repository.saveAndFlush(event);
+            } else {
+                throw new AccessException("Add adminComment to send event to revision");
+            }
         } else {
             throw new AccessException("Cannot publish the event");
         }
     }
 
-    private Event updateInformation(EventDtoRequest dto, Event event) {
+    private Event updateInformation(EventDtoRequestUpdate dto, Event event) {
         if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
             event.setTitle(dto.getTitle());
         }
@@ -100,10 +127,6 @@ public class EventService {
         }
         if (dto.getCategoryId() != null) {
             event.setCategory(categoryService.findById(dto.getCategoryId()));
-        }
-        if (dto.getEventDate() != null) {
-            checkEvenDate(dto.getEventDate(), 2);
-            event.setEventDate(dto.getEventDate());
         }
         if (dto.getLocationDto() != null) {
             event.setLat(dto.getLocationDto().getLat());
@@ -121,9 +144,11 @@ public class EventService {
         return event;
     }
 
-    public void checkEvenDate(LocalDateTime eventDate, int hoursBefore) {
+    public boolean checkEvenDate(LocalDateTime eventDate, int hoursBefore) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(hoursBefore))) {
-            throw new EventDateException(eventDate);
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -296,6 +321,70 @@ public class EventService {
         if (start != null & end != null && !start.isBefore(end)) {
             throw new WrongParamException("end before start");
         }
+    }
+
+    public List<Event> getEventsForModeration(int from, int size, Boolean withAdminComment) {
+        return repository.findByStateAndComment(withAdminComment, State.PENDING, new OffsetBasedPageRequest(from, size, Sort.by("eventDate").ascending()));
+    }
+
+    public Map<String, List<EventDtoWithAdminComment>> moderationEvents(EventsDtoConfirmation dto) {
+        List<Event> events = repository.findByStateAndIds(dto.getIds(), State.PENDING);//todo проверить что выгружается с категорией и инициатором
+        if (events.isEmpty()) {
+            throw new NotFoundException("No event in state PENDING for " + dto.getStateAction().getAction());
+        }
+        Map<String, List<EventDtoWithAdminComment>> resultMap = new HashMap<>();
+        switch (dto.getStateAction()) {
+            case PUBLISH_EVENT:
+                List<Event> published = new ArrayList<>();
+                List<EventDtoWithAdminComment> notPublished = new ArrayList<>();
+                for (Event event : events) {
+                    if (checkEvenDate(event.getEventDate(), 1)) {
+                        event.setState(State.PUBLISHED);
+                        event.setPublishedOn(LocalDateTime.now());
+                        published.add(event);
+                    } else {
+                        notPublished.add(eventMapper.fromEventToDtoWithAdminComment(event));
+                    }
+                }
+                repository.saveAllAndFlush(published);
+                resultMap.put("published", published.stream().map(eventMapper::fromEventToDtoWithAdminComment).collect(Collectors.toList()));
+                resultMap.put("too_close_eventDate", notPublished);
+                return resultMap;
+            case REJECT_EVENT:
+                for (Event event : events) {
+                    event.setState(State.CANCELED);
+                }
+                repository.saveAllAndFlush(events);
+                resultMap.put("Canceled", events.stream().map(eventMapper::fromEventToDtoWithAdminComment).collect(Collectors.toList()));
+                return resultMap;
+            case SEND_TO_REVISION:
+                List<Event> processed = new ArrayList<>();
+                List<EventDtoWithAdminComment> notProcessed = new ArrayList<>();
+                for (Event event : events) {
+                    if (event.getAdminComment() == null) {
+                        notProcessed.add(eventMapper.fromEventToDtoWithAdminComment(event));
+                    } else {
+                        event.setState(State.REVISION);
+                        processed.add(event);
+                    }
+                }
+                repository.saveAllAndFlush(processed);
+                resultMap.put("Sent_to_revision", processed.stream().map(eventMapper::fromEventToDtoWithAdminComment).collect(Collectors.toList()));
+                resultMap.put("Need_comment_by_admin", notProcessed);
+                return resultMap;
+            default:
+                throw new AccessException("Wrong State Action");
+        }
+    }
+
+    public Event addAdminComment(AdminCommentDto commentDto, Long eventId) {
+        Event event = repository.findById(eventId).orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+        if (event.getState().equals(State.PENDING)) {
+            event.setAdminComment(commentDto.getComment());
+        } else {
+            throw new AccessException("State must be PENDING for adding comment by admin");
+        }
+        return repository.saveAndFlush(event);
     }
 
 }
