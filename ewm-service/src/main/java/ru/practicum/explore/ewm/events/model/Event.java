@@ -6,7 +6,6 @@ import ru.practicum.explore.ewm.compilations.Compilation;
 import ru.practicum.explore.ewm.users.User;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,9 +33,9 @@ public class Event {
     @Column(nullable = false, name = "event_date")
     private LocalDateTime eventDate;
     @Column(nullable = false)
-    private BigDecimal lat;
+    private Double lat;
     @Column(nullable = false)
-    private BigDecimal lon;
+    private Double lon;
     @Column(nullable = false)
     private Boolean paid;
     @Column(name = "participant_limit")

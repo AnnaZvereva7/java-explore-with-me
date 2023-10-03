@@ -12,7 +12,6 @@ import ru.practicum.explore.ewm.events.model.Event;
 import ru.practicum.explore.ewm.events.model.State;
 import ru.practicum.explore.ewm.users.User;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +40,7 @@ class EventRepositoryTest {
         assertEquals("title2", events.get(0).getTitle());
         assertEquals("category2", events.get(0).getCategory().getName());
         assertEquals(LocalDateTime.parse("2025-08-01 12:00:00", CommonConstant.FORMATTER), events.get(0).getEventDate());
-        assertEquals(38.62, events.get(0).getLon().doubleValue());
+        assertEquals(38.62, events.get(0).getLon());
         assertEquals(true, events.get(0).getPaid());
         assertEquals(State.PUBLISHED, events.get(0).getState());
         assertEquals("name1", events.get(0).getInitiator().getName());
@@ -136,7 +135,7 @@ class EventRepositoryTest {
     void saveAllAndFlush_whenNew() {
         Category cat = new Category(1, "category1");
         Event event = new Event(null, "title", "annotationannotationannotation", "descriptiondescriptiondescription",
-                cat, LocalDateTime.now().plusDays(1), new BigDecimal(56.15), new BigDecimal(45.12), true, 10,
+                cat, LocalDateTime.now().plusDays(1), 56.15, 45.12, true, 10,
                 true, State.PUBLISHED, new User(1L, "name1", "emailNew@mail.ru"),
                 LocalDateTime.now().minusDays(1), null, null, null, null, null);
         List<Event> events = repository.saveAllAndFlush(List.of(event));
@@ -151,7 +150,7 @@ class EventRepositoryTest {
     void saveAllAndFlush_whenUpdateAndChangeCategoryAndUserName() {
         Category cat = new Category(1, "categoryNew");
         Event event = new Event(1L, "titleNew", "Newnannotationannotation", "descriptiondescriptiondescription",
-                cat, LocalDateTime.now().plusDays(1), new BigDecimal(56.15), new BigDecimal(45.12), true, 10,
+                cat, LocalDateTime.now().plusDays(1), 56.15, 45.12, true, 10,
                 true, State.PUBLISHED, new User(1L, "name25", "emailNew@mail.ru"),
                 LocalDateTime.now().minusDays(1), null, null, null, null, null);
         List<Event> events = repository.saveAllAndFlush(List.of(event));

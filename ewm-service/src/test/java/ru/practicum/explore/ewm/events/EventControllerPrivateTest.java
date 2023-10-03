@@ -17,7 +17,6 @@ import ru.practicum.explore.ewm.events.dto.LocationDto;
 import ru.practicum.explore.ewm.events.dto.request.EventDtoRequestCreate;
 import ru.practicum.explore.ewm.exceptions.ErrorHandler;
 
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
@@ -54,7 +53,7 @@ class EventControllerPrivateTest {
     @Test
     void addEvent_whenWrongDto() throws Exception {
         EventDtoRequestCreate dto = new EventDtoRequestCreate("    ", "annotationannotationannotation", "descriptiondescriptiondescription",
-                1, now.plusDays(1), new LocationDto(new BigDecimal(56.12), new BigDecimal(45.12)), true, 10, true);
+                1, now.plusDays(1), new LocationDto(56.12, 45.12), true, 10, true);
         mvc.perform(post("/users/{userId}/events", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
@@ -70,7 +69,7 @@ class EventControllerPrivateTest {
     @Test
     void addEvent_whenWrongLocation() throws Exception {
         EventDtoRequestCreate dto = new EventDtoRequestCreate("title", "annotationannotationannotation", "descriptiondescriptiondescription",
-                1, now.plusDays(1), new LocationDto(new BigDecimal(200), new BigDecimal(45.12)), true, 10, true);
+                1, now.plusDays(1), new LocationDto(200.0, 45.12), true, 10, true);
         mvc.perform(post("/users/{userId}/events", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
@@ -86,7 +85,7 @@ class EventControllerPrivateTest {
     @Test
     void addEvent_when1HourBeforeEvent() throws Exception {
         EventDtoRequestCreate dto = new EventDtoRequestCreate("title", "annotationannotationannotation", "descriptiondescriptiondescriptiondescription",
-                1, now.plusHours(1), new LocationDto(new BigDecimal(56.15), new BigDecimal(45.12)), true, 10, true);
+                1, now.plusHours(1), new LocationDto(56.15, 45.12), true, 10, true);
         mvc.perform(post("/users/{userId}/events", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
