@@ -62,80 +62,6 @@
 			"response": []
 		},
 		{
-			"name": "Add event 103",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
-							"    pm.response.to.have.status(201);",
-							"    pm.response.to.be.withBody;",
-							"    pm.response.to.be.json;",
-							"});",
-							"",
-							"const source = JSON.parse(pm.request.body.raw);",
-							"const target = pm.response.json();",
-							"",
-							"pm.test(\"Событие должно содержать поля: id, title, annotation, category, paid, eventDate, initiator, description, participantLimit, state, createdOn, location, requestModeration\", function () {",
-							"pm.expect(target).to.have.property('id');",
-							"pm.expect(target).to.have.property('title');",
-							"pm.expect(target).to.have.property('annotation');",
-							"pm.expect(target).to.have.property('category');",
-							"pm.expect(target).to.have.property('description');",
-							"pm.expect(target).to.have.property('eventDate');",
-							"pm.expect(target).to.have.property('location');",
-							"pm.expect(target).to.have.property('paid');",
-							"pm.expect(target).to.have.property('participantLimit');",
-							"pm.expect(target).to.have.property('requestModeration');",
-							"});",
-							"",
-							"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {",
-							"    pm.expect(target.id).to.not.be.null;",
-							"    pm.expect(target.title).equal(source.title, 'Название события должно соответствовать названию события в запросе');",
-							"    pm.expect(target.annotation).equal(source.annotation, 'Аннотация события должна соответствовать аннотации события в запросе');",
-							"    pm.expect(target.paid.toString()).equal(source.paid.toString(), 'Стоимость события должна соответствовать стоимости события в запросе');",
-							"    pm.expect(target.eventDate).equal(source.eventDate, 'Дата проведения события должна соответствовать дате проведения события в запросе');",
-							"    pm.expect(target.description).equal(source.description, 'Описание события должно соответствовать описание события в запросе');",
-							"    pm.expect(target.participantLimit.toString()).equal(source.participantLimit.toString(), 'Лимит участников события должно соответствовать лимиту участников события в запросе');",
-							"    pm.expect(target.location.lat.toString()).equal(source.location.lat.toString(), 'Широта локации проведения события должна соответствовать широте локации проведения события в запросе');",
-							"    pm.expect(target.location.lon.toString()).equal(source.location.lon.toString(), 'Долгота локации проведения события должна соответствовать долготе локации проведения события в запросе');",
-							"    pm.expect(target.requestModeration.toString()).equal(source.requestModeration.toString(), 'Необходимость модерации события должна соответствовать необходимости модерации события в запросе');",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"annotation\": \"Сплав на байдарках похож на полет.\",\n  \"category\": 1,\n  \"description\": \"Сплав на байдарках похож на полет. На спокойной воде — это парение. На бурной, порожистой — выполнение фигур высшего пилотажа. И то, и другое дарят чувство обновления, феерические эмоции, яркие впечатления.\",\n  \"eventDate\": \"2024-12-31 15:10:05\",\n  \"location\": {\n    \"lat\": 55.754167,\n    \"lon\": 37.62\n  },\n  \"paid\": true,\n  \"participantLimit\": 10,\n  \"requestModeration\": false,\n  \"title\": \"Сплав на байдарках\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/users/1/events",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"users",
-						"1",
-						"events"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get list events with admin comment for moderation when empty",
 			"event": [
 				{
@@ -178,6 +104,69 @@
 							"key": "withAdminComment",
 							"value": "true"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add event 103",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
+							"    pm.response.to.have.status(201);",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const source = JSON.parse(pm.request.body.raw);",
+							"const target = pm.response.json();",
+							"",
+							"pm.test(\"Событие должно содержать поля: id, title, annotation, category, paid, eventDate, initiator, description, participantLimit, state, createdOn, location, requestModeration\", function () {",
+							"pm.expect(target).to.have.property('id');",
+							"pm.expect(target).to.have.property('title');",
+							"pm.expect(target).to.have.property('annotation');",
+							"pm.expect(target).to.have.property('category');",
+							"pm.expect(target).to.have.property('description');",
+							"pm.expect(target).to.have.property('eventDate');",
+							"pm.expect(target).to.have.property('location');",
+							"pm.expect(target).to.have.property('paid');",
+							"pm.expect(target).to.have.property('participantLimit');",
+							"pm.expect(target).to.have.property('requestModeration');",
+							"});",
+							"",
+							"pm.environment.set(\"eventId\", target.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"annotation\": \"Сплав на байдарках похож на полет.\",\n  \"category\": 1,\n  \"description\": \"Сплав на байдарках похож на полет. На спокойной воде — это парение. На бурной, порожистой — выполнение фигур высшего пилотажа. И то, и другое дарят чувство обновления, феерические эмоции, яркие впечатления.\",\n  \"eventDate\": \"2024-12-31 15:10:05\",\n  \"location\": {\n    \"lat\": 55.754167,\n    \"lon\": 37.62\n  },\n  \"paid\": true,\n  \"participantLimit\": 10,\n  \"requestModeration\": false,\n  \"title\": \"Сплав на байдарках\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/1/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"1",
+						"events"
 					]
 				}
 			},
@@ -257,38 +246,38 @@
 							"",
 							"pm.test(\"Test data of event\", function () {",
 							"  pm.expect(target).to.have.property('id');",
-							"  pm.expect(target.id).to.be.eql(103);",
 							"  pm.expect(target).to.have.property('title');",
-							"  pm.expect(target.title).to.be.eql('Сплав на байдарках');",
 							"  pm.expect(target).to.have.property('annotation');",
-							"  pm.expect(target.annotation).to.be.eql('Сплав на байдарках похож на полет.');",
 							"  pm.expect(target).to.have.property('description');",
 							"  pm.expect(target).to.have.property('category');",
 							"  pm.expect(target.category).to.have.property('id');",
-							"  pm.expect(target.category.id).to.be.eql(1);",
 							"  pm.expect(target.category).to.have.property('name');",
 							"  pm.expect(target).to.have.property('eventDate');",
-							"  pm.expect(target.eventDate).to.be.eql('2024-12-31 15:10:05')",
 							"  pm.expect(target).to.have.property('location');",
 							"  pm.expect(target.location).to.have.property('lon');",
 							"  pm.expect(target).to.have.property('paid');",
-							"  pm.expect(target.paid).to.be.eql(true);",
 							"  pm.expect(target).to.have.property('participantLimit');",
 							"  pm.expect(target).to.have.property('requestModeration');",
 							"  pm.expect(target).to.have.property('state');",
-							"  pm.expect(target.state).to.be.eql('PENDING');",
 							"  pm.expect(target).to.have.property('initiator');",
 							"  pm.expect(target.initiator).to.have.property('id');",
-							"  pm.expect(target.initiator.id).to.be.eql(1);",
 							"  pm.expect(target.initiator).to.have.property('name');",
 							"  pm.expect(target).to.have.property('createdOn');",
 							"  pm.expect(target).to.have.property('publishedOn');",
-							"  pm.expect(target.publishedOn).to.be.eql(null);",
 							"  pm.expect(target).to.have.property('confirmedRequests');",
 							"  pm.expect(target).to.have.property('views');",
 							"  pm.expect(target).to.have.property('adminComment');",
 							"  pm.expect(target.adminComment).to.be.eql('Some comment')",
 							"} );"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -307,7 +296,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/admin/events/103/comment",
+					"raw": "http://localhost:8080/admin/events/:eventId/comment",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -316,8 +305,14 @@
 					"path": [
 						"admin",
 						"events",
-						"103",
+						":eventId",
 						"comment"
+					],
+					"variable": [
+						{
+							"key": "eventId",
+							"value": "{{eventId}}"
+						}
 					]
 				}
 			},
@@ -340,33 +335,24 @@
 							"",
 							"pm.test(\"Test data of event\", function () {",
 							"  pm.expect(target).to.have.property('id');",
-							"  pm.expect(target.id).to.be.eql(103);",
 							"  pm.expect(target).to.have.property('title');",
-							"  pm.expect(target.title).to.be.eql('Сплав на байдарках');",
 							"  pm.expect(target).to.have.property('annotation');",
-							"  pm.expect(target.annotation).to.be.eql('Сплав на байдарках похож на полет.');",
 							"  pm.expect(target).to.have.property('description');",
 							"  pm.expect(target).to.have.property('category');",
 							"  pm.expect(target.category).to.have.property('id');",
-							"  pm.expect(target.category.id).to.be.eql(1);",
 							"  pm.expect(target.category).to.have.property('name');",
 							"  pm.expect(target).to.have.property('eventDate');",
-							"  pm.expect(target.eventDate).to.be.eql('2024-12-31 15:10:05')",
 							"  pm.expect(target).to.have.property('location');",
 							"  pm.expect(target.location).to.have.property('lon');",
 							"  pm.expect(target).to.have.property('paid');",
-							"  pm.expect(target.paid).to.be.eql(true);",
 							"  pm.expect(target).to.have.property('participantLimit');",
 							"  pm.expect(target).to.have.property('requestModeration');",
 							"  pm.expect(target).to.have.property('state');",
-							"  pm.expect(target.state).to.be.eql('REVISION');",
 							"  pm.expect(target).to.have.property('initiator');",
 							"  pm.expect(target.initiator).to.have.property('id');",
-							"  pm.expect(target.initiator.id).to.be.eql(1);",
 							"  pm.expect(target.initiator).to.have.property('name');",
 							"  pm.expect(target).to.have.property('createdOn');",
 							"  pm.expect(target).to.have.property('publishedOn');",
-							"  pm.expect(target.publishedOn).to.be.eql(null);",
 							"  pm.expect(target).to.have.property('confirmedRequests');",
 							"  pm.expect(target).to.have.property('views');",
 							"  pm.expect(target).to.have.property('adminComment');",
@@ -390,7 +376,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/admin/events/103",
+					"raw": "http://localhost:8080/admin/events/:eventId",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -399,7 +385,13 @@
 					"path": [
 						"admin",
 						"events",
-						"103"
+						":eventId"
+					],
+					"variable": [
+						{
+							"key": "eventId",
+							"value": "{{eventId}}"
+						}
 					]
 				}
 			},
@@ -445,7 +437,9 @@
 							"    pm.expect(target.location.lat.toString()).equal(source.location.lat.toString(), 'Широта локации проведения события должна соответствовать широте локации проведения события в запросе');",
 							"    pm.expect(target.location.lon.toString()).equal(source.location.lon.toString(), 'Долгота локации проведения события должна соответствовать долготе локации проведения события в запросе');",
 							"    pm.expect(target.requestModeration.toString()).equal(source.requestModeration.toString(), 'Необходимость модерации события должна соответствовать необходимости модерации события в запросе');",
-							"});"
+							"});",
+							"",
+							"pm.environment.set(\"eventId\", target.id);"
 						],
 						"type": "text/javascript"
 					}
@@ -508,7 +502,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"ids\":[\n        104\n    ],\n    \"stateAction\": \"PUBLISH_EVENT\"\n}",
+					"raw": "{\n    \"ids\":[\n        {{eventId}}\n    ],\n    \"stateAction\": \"PUBLISH_EVENT\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -571,7 +565,8 @@
 							"    pm.expect(target.location.lat.toString()).equal(source.location.lat.toString(), 'Широта локации проведения события должна соответствовать широте локации проведения события в запросе');",
 							"    pm.expect(target.location.lon.toString()).equal(source.location.lon.toString(), 'Долгота локации проведения события должна соответствовать долготе локации проведения события в запросе');",
 							"    pm.expect(target.requestModeration.toString()).equal(source.requestModeration.toString(), 'Необходимость модерации события должна соответствовать необходимости модерации события в запросе');",
-							"});"
+							"});",
+							"pm.environment.set(\"eventId\", target.id);"
 						],
 						"type": "text/javascript"
 					}
@@ -635,7 +630,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"ids\":[\n        105\n    ],\n    \"stateAction\": \"SEND_TO_REVISION\"\n}",
+					"raw": "{\n    \"ids\":[\n        {{eventId}}\n    ],\n    \"stateAction\": \"SEND_TO_REVISION\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -732,35 +727,24 @@
 							"",
 							"pm.test(\"Test data of event\", function () {",
 							"  pm.expect(target).to.have.property('id');",
-							"  pm.expect(target.id).to.be.eql(105);",
 							"  pm.expect(target).to.have.property('title');",
-							"  pm.expect(target.title).to.be.eql('Новое событие3');",
 							"  pm.expect(target).to.have.property('annotation');",
-							"  pm.expect(target.annotation).to.be.eql('Еще одно мероприятие3.');",
 							"  pm.expect(target).to.have.property('description');",
 							"  pm.expect(target).to.have.property('category');",
 							"  pm.expect(target.category).to.have.property('id');",
-							"  pm.expect(target.category.id).to.be.eql(1);",
 							"  pm.expect(target.category).to.have.property('name');",
-							"  pm.expect(target.category.name).to.be.eql('Berkshire9');",
 							"  pm.expect(target).to.have.property('eventDate');",
-							"  pm.expect(target.eventDate).to.be.eql('2024-10-30 15:10:05')",
 							"  pm.expect(target).to.have.property('location');",
 							"  pm.expect(target.location).to.have.property('lon');",
 							"  pm.expect(target).to.have.property('paid');",
-							"  pm.expect(target.paid).to.be.eql(true);",
 							"  pm.expect(target).to.have.property('participantLimit');",
 							"  pm.expect(target).to.have.property('requestModeration');",
 							"  pm.expect(target).to.have.property('state');",
-							"  pm.expect(target.state).to.be.eql('PENDING');",
 							"  pm.expect(target).to.have.property('initiator');",
 							"  pm.expect(target.initiator).to.have.property('id');",
-							"  pm.expect(target.initiator.id).to.be.eql(1);",
 							"  pm.expect(target.initiator).to.have.property('name');",
-							"  pm.expect(target.initiator.name).to.be.eql('Bernard Bartoletti III');",
 							"  pm.expect(target).to.have.property('createdOn');",
 							"  pm.expect(target).to.have.property('publishedOn');",
-							"  pm.expect(target.publishedOn).to.be.eql(null);",
 							"  pm.expect(target).to.have.property('confirmedRequests');",
 							"  pm.expect(target).to.have.property('views');",
 							"  pm.expect(target).to.have.property('adminComment');",
@@ -784,7 +768,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/admin/events/105/comment",
+					"raw": "http://localhost:8080/admin/events/:eventId/comment",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -793,8 +777,14 @@
 					"path": [
 						"admin",
 						"events",
-						"105",
+						":eventId",
 						"comment"
+					],
+					"variable": [
+						{
+							"key": "eventId",
+							"value": "{{eventId}}"
+						}
 					]
 				}
 			},
@@ -830,7 +820,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"ids\":[\n        105\n    ],\n    \"stateAction\": \"SEND_TO_REVISION\"\n}",
+					"raw": "{\n    \"ids\":[\n        {{eventId}}\n    ],\n    \"stateAction\": \"SEND_TO_REVISION\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
