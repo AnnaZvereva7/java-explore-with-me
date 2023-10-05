@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.jdbc.Sql;
+import ru.practicum.explore.ewm.categories.Category;
 import ru.practicum.explore.ewm.common.CommonConstant;
 import ru.practicum.explore.ewm.common.OffsetBasedPageRequest;
 import ru.practicum.explore.ewm.events.model.Event;
 import ru.practicum.explore.ewm.events.model.State;
+import ru.practicum.explore.ewm.users.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,7 +40,7 @@ class EventRepositoryTest {
         assertEquals("title2", events.get(0).getTitle());
         assertEquals("category2", events.get(0).getCategory().getName());
         assertEquals(LocalDateTime.parse("2025-08-01 12:00:00", CommonConstant.FORMATTER), events.get(0).getEventDate());
-        assertEquals(38.62f, events.get(0).getLon());
+        assertEquals(38.62, events.get(0).getLon());
         assertEquals(true, events.get(0).getPaid());
         assertEquals(State.PUBLISHED, events.get(0).getState());
         assertEquals("name1", events.get(0).getInitiator().getName());
@@ -104,4 +106,91 @@ class EventRepositoryTest {
         assertEquals("title3", events.get(2).getTitle());
     }
 
+    @Test
+    @Sql({"/schemaTest.sql", "/import_tables.sql"})
+    void findById_whenOk() {
+        Optional<Event> event = repository.findById(1L);
+        assertEquals("category1", event.get().getCategory().getName());
+        assertEquals("name1", event.get().getInitiator().getName());
+    }
+
+    @Test
+    @Sql({"/schemaTest.sql", "/import_tables.sql"})
+    void findByStateAndIds_whenOk() {
+        List<Event> events = repository.findByStateAndIds(List.of(1L, 2L, 3L), State.PENDING);
+        assertEquals(1, events.size());
+        assertEquals("category1", events.get(0).getCategory().getName());
+        assertEquals("name1", events.get(0).getInitiator().getName());
+    }
+
+    @Test
+    @Sql({"/schemaTest.sql", "/import_tables.sql"})
+    void saveAllAndFlush_whenEmpty() {
+        List<Event> events = repository.saveAllAndFlush(List.of());
+        assertEquals(0, events.size());
+    }
+
+    @Test
+    @Sql({"/schemaTest.sql", "/import_tables.sql"})
+    void saveAllAndFlush_whenNew() {
+        Category cat = new Category(1, "category1");
+        Event event = new Event(null, "title", "annotationannotationannotation", "descriptiondescriptiondescription",
+                cat, LocalDateTime.now().plusDays(1), 56.15, 45.12, true, 10,
+                true, State.PUBLISHED, new User(1L, "name1", "emailNew@mail.ru"),
+                LocalDateTime.now().minusDays(1), null, null, null, null, null);
+        List<Event> events = repository.saveAllAndFlush(List.of(event));
+        assertEquals(1, events.size());
+        assertEquals("name1", events.get(0).getInitiator().getName());
+        assertEquals("annotationannotationannotation", events.get(0).getAnnotation());
+        assertEquals("category1", events.get(0).getCategory().getName());
+    }
+
+    @Test
+    @Sql({"/schemaTest.sql", "/import_tables.sql"})
+    void saveAllAndFlush_whenUpdateAndChangeCategoryAndUserName() {
+        Category cat = new Category(1, "categoryNew");
+        Event event = new Event(1L, "titleNew", "Newnannotationannotation", "descriptiondescriptiondescription",
+                cat, LocalDateTime.now().plusDays(1), 56.15, 45.12, true, 10,
+                true, State.PUBLISHED, new User(1L, "name25", "emailNew@mail.ru"),
+                LocalDateTime.now().minusDays(1), null, null, null, null, null);
+        List<Event> events = repository.saveAllAndFlush(List.of(event));
+        assertEquals(1, events.size());
+        assertEquals("name1", events.get(0).getInitiator().getName());
+        assertEquals("Newnannotationannotation", events.get(0).getAnnotation());
+        assertEquals("category1", events.get(0).getCategory().getName());
+    }
+
+    @Test
+    @Sql({"/schemaTest.sql", "/import_tables.sql"})
+    void findByStateAndComment_withComment() {
+        List<Event> events = repository.findByStateAndComment(true, State.PENDING,
+                new OffsetBasedPageRequest(0, 10, Sort.by("eventDate").ascending()));
+        assertEquals(1, events.size());
+        assertEquals(5L, events.get(0).getId());
+        assertEquals("some admin comment5", events.get(0).getAdminComment());
+        assertEquals("name1", events.get(0).getInitiator().getName());
+        assertEquals("category3", events.get(0).getCategory().getName());
+    }
+
+    @Test
+    @Sql({"/schemaTest.sql", "/import_tables.sql"})
+    void findByStateAndComment_withOutComment() {
+        List<Event> events = repository.findByStateAndComment(false, State.PENDING,
+                new OffsetBasedPageRequest(0, 10, Sort.by("eventDate").ascending()));
+        assertEquals(1, events.size());
+        assertEquals(1L, events.get(0).getId());
+        assertEquals(null, events.get(0).getAdminComment());
+        assertEquals("name1", events.get(0).getInitiator().getName());
+        assertEquals("category1", events.get(0).getCategory().getName());
+    }
+
+    @Test
+    @Sql({"/schemaTest.sql", "/import_tables.sql"})
+    void findByStateAndComment_AllPending() {
+        List<Event> events = repository.findByStateAndComment(null, State.PENDING,
+                new OffsetBasedPageRequest(0, 10, Sort.by("eventDate").ascending()));
+        assertEquals(2, events.size());
+        assertEquals(1L, events.get(0).getId());
+        assertEquals(5L, events.get(1).getId());
+    }
 }

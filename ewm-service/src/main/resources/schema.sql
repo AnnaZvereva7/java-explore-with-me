@@ -16,15 +16,16 @@ annotation VARCHAR(2000) NOT NULL,
 description VARCHAR(7000) NOT NULL,
 category_id INT REFERENCES categories (id) ON DELETE RESTRICT NOT NULL,
 event_date TIMESTAMP NOT NULL,
-lon FLOAT NOT NULL,
-lat FLOAT NOT NULL,
+lon NUMERIC(9,6) NOT NULL,
+lat NUMERIC(9,6) NOT NULL,
 paid BOOLEAN NOT NULL,
 request_moderation BOOLEAN NOT NULL,
 participant_limit INT NOT NULL,
 state VARCHAR(10) NOT NULL,
 initiator_id BIGINT REFERENCES users (id) ON DELETE CASCADE NOT NULL,
 created_on TIMESTAMP NOT NULL,
-published_on TIMESTAMP
+published_on TIMESTAMP,
+admin_comment VARCHAR(7000)
 );
 
 CREATE TABLE IF NOT EXISTS requests (

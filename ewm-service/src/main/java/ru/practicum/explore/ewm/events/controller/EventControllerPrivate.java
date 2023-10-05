@@ -7,12 +7,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.ewm.categories.Category;
 import ru.practicum.explore.ewm.categories.CategoryService;
-import ru.practicum.explore.ewm.common.Marker;
 import ru.practicum.explore.ewm.events.EventService;
 import ru.practicum.explore.ewm.events.dto.EventDto;
-import ru.practicum.explore.ewm.events.dto.EventDtoRequest;
 import ru.practicum.explore.ewm.events.dto.EventDtoShort;
+import ru.practicum.explore.ewm.events.dto.EventDtoWithAdminComment;
 import ru.practicum.explore.ewm.events.dto.EventMapper;
+import ru.practicum.explore.ewm.events.dto.request.EventDtoRequestCreate;
+import ru.practicum.explore.ewm.events.dto.request.EventDtoRequestUpdateUser;
 import ru.practicum.explore.ewm.events.model.Event;
 import ru.practicum.explore.ewm.requests.dto.RequestDto;
 import ru.practicum.explore.ewm.requests.dto.RequestDtoConfirmation;
@@ -20,6 +21,7 @@ import ru.practicum.explore.ewm.requests.dto.RequestMapper;
 import ru.practicum.explore.ewm.users.User;
 import ru.practicum.explore.ewm.users.UserService;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -52,9 +54,8 @@ public class EventControllerPrivate {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventDto addEvent(@PathVariable Long userId,
-                             @RequestBody @Validated(Marker.OnCreate.class) EventDtoRequest dto) {
+                             @RequestBody @Valid EventDtoRequestCreate dto) {
         log.info("Private: add new event {} by user {}", dto, userId);
-        service.checkEvenDate(dto.getEventDate(), 2);
         User initiator = userService.findById(userId);
         Category category = categoryService.findById(dto.getCategoryId());
         Event newEvent = mapper.fromDtoRequestToNewEvent(dto, initiator, category);
@@ -62,18 +63,18 @@ public class EventControllerPrivate {
     }
 
     @GetMapping("/{eventId}")
-    public EventDto getEventById(@PathVariable Long eventId,
-                                 @PathVariable Long userId) {
+    public EventDtoWithAdminComment getEventById(@PathVariable Long eventId,
+                                                 @PathVariable Long userId) {
         log.info("Private: get event with id {} by user with id {}", eventId, userId);
-        return mapper.fromEventToDto(service.findEventByIdAndUserFull(eventId, userId));
+        return mapper.fromEventToDtoWithAdminComment(service.findEventByIdAndUserFull(eventId, userId));
     }
 
     @PatchMapping("/{eventId}")
-    public EventDto updateEvent(@PathVariable Long eventId,
-                                @PathVariable Long userId,
-                                @RequestBody @Validated(Marker.OnUpdate.class) EventDtoRequest dto) {
+    public EventDtoWithAdminComment updateEvent(@PathVariable Long eventId,
+                                                @PathVariable Long userId,
+                                                @RequestBody @Valid EventDtoRequestUpdateUser dto) {
         log.info("Private: update information about event id {} by user.id={}, new information {}", eventId, userId, dto);
-        return mapper.fromEventToDto(service.updateByOwner(dto, userId, eventId));
+        return mapper.fromEventToDtoWithAdminComment(service.updateByOwner(dto, userId, eventId));
     }
 
     @GetMapping("/{eventId}/requests")

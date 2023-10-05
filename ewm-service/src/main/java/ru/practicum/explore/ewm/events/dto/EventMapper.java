@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.explore.ewm.categories.Category;
 import ru.practicum.explore.ewm.categories.dto.CategoryMapper;
+import ru.practicum.explore.ewm.events.dto.request.EventDtoRequestCreate;
 import ru.practicum.explore.ewm.events.model.Event;
 import ru.practicum.explore.ewm.events.model.State;
 import ru.practicum.explore.ewm.users.User;
@@ -17,7 +18,7 @@ public class EventMapper {
     private final CategoryMapper categoryMapper;
     private final UserMapper userMapper;
 
-    public Event fromDtoRequestToNewEvent(EventDtoRequest dto, User initiator, Category category) {
+    public Event fromDtoRequestToNewEvent(EventDtoRequestCreate dto, User initiator, Category category) {
         return Event.builder()
                 .title(dto.getTitle())
                 .annotation(dto.getAnnotation())
@@ -68,6 +69,28 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .confirmedRequests(event.getConfirmedRequests() == null ? 0 : event.getConfirmedRequests())
                 .views(event.getViews() == null ? 0 : event.getViews())
+                .build();
+    }
+
+    public EventDtoWithAdminComment fromEventToDtoWithAdminComment(Event event) {
+        return EventDtoWithAdminComment.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .annotation(event.getAnnotation())
+                .description(event.getDescription())
+                .category(categoryMapper.fromCategoryToDto(event.getCategory()))
+                .eventDate(event.getEventDate())
+                .location(new LocationDto(event.getLat(), event.getLon()))
+                .paid(event.getPaid())
+                .participantLimit(event.getParticipantLimit())
+                .requestModeration(event.getRequestModeration())
+                .state(event.getState())
+                .initiator(userMapper.fromUserToDtoShort(event.getInitiator()))
+                .createdOn(event.getCreatedOn())
+                .publishedOn(event.getPublishedOn())
+                .confirmedRequests(event.getConfirmedRequests() == null ? 0 : event.getConfirmedRequests())
+                .views(event.getViews() == null ? 0 : event.getViews())
+                .adminComment(event.getAdminComment())
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package ru.practicum.explore.ewm.events;
+package ru.practicum.explore.ewm.events.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -11,34 +11,34 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.practicum.explore.ewm.events.controller.EventControllerPrivate;
+import ru.practicum.explore.ewm.events.EventService;
 import ru.practicum.explore.ewm.events.dto.EventMapper;
-import ru.practicum.explore.ewm.events.dto.LocationDto;
-import ru.practicum.explore.ewm.events.dto.request.EventDtoRequestCreate;
+import ru.practicum.explore.ewm.events.dto.request.AdminCommentDto;
+import ru.practicum.explore.ewm.events.dto.request.EventsDtoConfirmation;
+import ru.practicum.explore.ewm.events.model.stateAction.StateActionAdmin;
 import ru.practicum.explore.ewm.exceptions.ErrorHandler;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-class EventControllerPrivateTest {
-
+class EventControllerAdminTest {
     @Mock
     private EventMapper mapper;
 
     @Mock
     private EventService service;
     @InjectMocks
-    private EventControllerPrivate controller;
+    private EventControllerAdmin controller;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private MockMvc mvc;
-    LocalDateTime now = LocalDateTime.now().withNano(0);
 
     @BeforeEach
     void setUp() {
@@ -47,14 +47,21 @@ class EventControllerPrivateTest {
     }
 
     @Test
-    void getEventsByUser() {
+    void findWithConditions() {
     }
 
     @Test
-    void addEvent_whenWrongDto() throws Exception {
-        EventDtoRequestCreate dto = new EventDtoRequestCreate("    ", "annotationannotationannotation", "descriptiondescriptiondescription",
-                1, now.plusDays(1), new LocationDto(56.12, 45.12), true, 10, true);
-        mvc.perform(post("/users/{userId}/events", 1L)
+    void update() {
+    }
+
+    @Test
+    void getEventForModeration() {
+    }
+
+    @Test
+    void moderateEvent_whenEmptyIds() throws Exception {
+        EventsDtoConfirmation dto = new EventsDtoConfirmation(List.of(), StateActionAdmin.PUBLISH_EVENT);
+        mvc.perform(patch("/admin/events/moderation")
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -62,15 +69,14 @@ class EventControllerPrivateTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
                 .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
-                .andExpect(jsonPath("$.message", is("Title must be not blank")))
+                .andExpect(jsonPath("$.message", is("must be not empty")))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test
-    void addEvent_whenWrongLocation() throws Exception {
-        EventDtoRequestCreate dto = new EventDtoRequestCreate("title", "annotationannotationannotation", "descriptiondescriptiondescription",
-                1, now.plusDays(1), new LocationDto(200.0, 45.12), true, 10, true);
-        mvc.perform(post("/users/{userId}/events", 1L)
+    void addAdminComment_whenWrongDto() throws Exception {
+        AdminCommentDto dto = new AdminCommentDto("com");
+        mvc.perform(post("/admin/events/{eventId}/comment", 1L)
                         .content(objectMapper.writeValueAsString(dto))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,39 +84,7 @@ class EventControllerPrivateTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
                 .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
-                .andExpect(jsonPath("$.message", is("must be less than or equal to 90")))
+                .andExpect(jsonPath("$.message", is("Size must be min 10 max 7000")))
                 .andExpect(jsonPath("$.timestamp").exists());
-    }
-
-    @Test
-    void addEvent_when1HourBeforeEvent() throws Exception {
-        EventDtoRequestCreate dto = new EventDtoRequestCreate("title", "annotationannotationannotation", "descriptiondescriptiondescriptiondescription",
-                1, now.plusHours(1), new LocationDto(56.15, 45.12), true, 10, true);
-        mvc.perform(post("/users/{userId}/events", 1L)
-                        .content(objectMapper.writeValueAsString(dto))
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status", is("BAD_REQUEST")))
-                .andExpect(jsonPath("$.reason", is("Incorrectly made request.")))
-                .andExpect(jsonPath("$.message", is("Must be more then 2 hour before event start")))
-                .andExpect(jsonPath("$.timestamp").exists());
-    }
-
-    @Test
-    void getEventById() {
-    }
-
-    @Test
-    void updateEvent() {
-    }
-
-    @Test
-    void getRequestsByEventId() {
-    }
-
-    @Test
-    void moderateRequests() {
     }
 }

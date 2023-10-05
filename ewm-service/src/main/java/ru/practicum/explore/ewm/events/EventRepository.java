@@ -55,4 +55,15 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Set<Event> findByIdIn(Set<Long> ids);
 
     Optional<Event> findByIdAndState(Long id, State state);
+
+    @Query("SELECT e from Event e WHERE e.state=:state AND " +
+            "(:withComment IS NULL OR (:withComment = true AND e.adminComment is NOT NULL) OR (:withComment = false AND e.adminComment is NULL))")
+    List<Event> findByStateAndComment(@Param("withComment") Boolean withAdminComment,
+                                      @Param("state") State state,
+                                      OffsetBasedPageRequest pageRequest);
+
+    @Query("SELECT e from Event e WHERE e.state=:state AND " +
+            "((:ids) is null or e.id in (:ids))")
+    List<Event> findByStateAndIds(@Param("ids") List<Long> ids,
+                                  @Param("state") State state);
 }

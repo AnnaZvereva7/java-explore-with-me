@@ -33,9 +33,9 @@ public class Event {
     @Column(nullable = false, name = "event_date")
     private LocalDateTime eventDate;
     @Column(nullable = false)
-    private Float lat;
+    private Double lat;
     @Column(nullable = false)
-    private Float lon;
+    private Double lon;
     @Column(nullable = false)
     private Boolean paid;
     @Column(name = "participant_limit")
@@ -57,6 +57,8 @@ public class Event {
     @Transient
     @EqualsAndHashCode.Exclude
     private List<Compilation> compilations;
+    @Column(name = "admin_comment")
+    private String adminComment;
 
     @Transient
     @EqualsAndHashCode.Exclude
